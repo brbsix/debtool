@@ -35,7 +35,7 @@ combo(){
             error "Could not identify downloaded package. Unable to unpack '$package'..."
             exit 1
         elif (( count == 1 )); then
-            generate "$dirdiff"
+            unpack "$dirdiff"
         elif (( count >= 2 )); then
             error "Appear to have download multiple packages. Unable to unpack '$package'..."
             exit 1
@@ -68,7 +68,7 @@ error(){
     echo "ERROR: $@" >&2
 }
 
-generate(){
+unpack(){
     # if argument is a debian archive file
     if dpkg-deb --info "$1" &>/dev/null; then
         local pkgtype=archive
@@ -109,7 +109,7 @@ generate(){
         if [[ -n $1 ]]; then
             error "'$1' is not an installed package or valid debian archive"
         else
-            error "You have not supplied a package to generate"
+            error "You have not supplied a package to unpack"
         fi
         exit 1
     fi
@@ -132,16 +132,16 @@ elif [[ $# -le 1 || $1 =~ ^(-h|--help|help)$ ]]; then
     echo "  -b, --build           create a debian archive from DIRECTORY"
     echo "  -c, --combo           download then unpack PACKAGE (supports multiple)"
     echo "  -d, --download        download PACKAGE via apt-get (supports multiple)"
-    echo "  -g, --generate        unpack ARCHIVE or PACKAGE into DIRECTORY"
+    echo "  -u, --unpack          unpack ARCHIVE or PACKAGE into DIRECTORY"
     exit 0
 elif [[ $1 =~ ^(-b|--build)$ ]]; then
-    build "$2"
+    build "${@:2}"
 elif [[ $1 =~ ^(-c|--combo)$ ]]; then
     combo "${@:2}"
 elif [[ $1 =~ ^(-d|--download)$ ]]; then
     download "${@:2}"
-elif [[ $1 =~ ^(-g|--generate)$ ]]; then
-    generate "$2"
+elif [[ $1 =~ ^(-u|--unpack)$ ]]; then
+    unpack "${@:2}"
 else
     error "Invalid option"
     exit 1
