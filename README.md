@@ -1,6 +1,6 @@
 # debtool
 
-debtool is a wrapper around several other utilities that aims to simplify the workflow for downloading, unpacking, and repacking debian packages.
+debtool is a wrapper around several other utilities that aims to simplify the workflow for downloading, unpacking, and repacking debian packages. It is especially handy if you just want to incorporate quick bug fixes, fix or remove unwanted package requirements, etc without the trouble of downloading sources. You can even rebuild packages that are no longer available in the apt repositories (so long as you have them installed).
 
 
 Installation
@@ -30,7 +30,7 @@ Usage
       -d, --download        download PACKAGE via apt-get (supports multiple)
       -u, --unpack          unpack ARCHIVE or PACKAGE into DIRECTORY
 
-To download a debian package (from sources):
+To download a debian package (from apt sources):
 
     debtool --download unar
 
@@ -38,23 +38,23 @@ You can even supply multiple package names at once if you'd like...
 
     debtool --download git mawk unar
 
-To unpack the debian package:
+To unpack a debian package:
 
     debtool --unpack unar_1.8.1-2_amd64.deb
 
-Or unpack the deb package to a particular directory:
+To unpack to a particular directory:
 
     debtool --unpack unar_1.8.1-2_amd64.deb unar
 
-You can even unpack an already installed package. If you've modified installed files, these changes will be incorporated:
+You can even unpack an already installed package. If you've modified installed files, these changes will be incorporated in the directory structure:
 
     debtool --unpack mawk
 
-There is also a combo command to download (from sources) and unpack at once:
+There is also a combo command to download and unpack at the same time:
 
     debtool --combo git mawk unar
 
-After you've made changes to the files (updating md5sums if necessary), you may rebuild the package:
+After you've made changes to the contents (updating md5sums if necessary), you may rebuild the package:
 
     debtool --build PACKAGEDIR
 
