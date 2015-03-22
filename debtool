@@ -6,12 +6,12 @@
 build(){
     if [[ -d $1 ]]; then
         if [[ -n $2 ]]; then
-            target=$2
+            local target=$2
         else
-            package=$(grep -oP '(?<=Package: ).+' "$1/DEBIAN/control")
-            version=$(grep -oP '(?<=Version: ).+' "$1/DEBIAN/control")
-            arch=$(grep -oP '(?<=Architecture: ).+' "$1/DEBIAN/control")
-            target=${package}_${version}_${arch}.deb
+            local package=$(grep -oP '(?<=Package: ).+' "$1/DEBIAN/control")
+            local version=$(grep -oP '(?<=Version: ).+' "$1/DEBIAN/control")
+            local arch=$(grep -oP '(?<=Architecture: ).+' "$1/DEBIAN/control")
+            local target=${package}_${version}_${arch}.deb
         fi
         fakeroot dpkg-deb --build "$1" "$target"
     else
@@ -24,7 +24,28 @@ build(){
     fi
 }
 
+combo(){
+    for package in "$@"; do
+        local pre=$(find -maxdepth 1 -type f -iname '*.deb')
+        download "$package"
+        local post=$(find -maxdepth 1 -type f -iname '*.deb')
+        local dirdiff=$(grep -Fxvf <(echo "$pre") <(echo "$post"))
+        local count=$(wc -l <<<"$dirdiff")
+        if (( count == 0 )); then
+            error "Could not identify downloaded package. Unable to unpack '$package'..."
+            exit 1
+        elif (( count == 1 )); then
+            generate "$dirdiff"
+        elif (( count >= 2 )); then
+            error "Appear to have download multiple packages. Unable to unpack '$package'..."
+            exit 1
+        fi
+    done
+}
+
 download(){
+    local successes
+    local failures
     for package in "$@"; do
         if apt-get download "$package" &>/dev/null; then
             successes+=("$package")
@@ -50,27 +71,34 @@ error(){
 generate(){
     # if argument is a debian archive file
     if dpkg-deb --info "$1" &>/dev/null; then
+        local pkgtype=archive
         if [[ -n $2 ]]; then
-            target=$2
+            local target=$2
         else
-            target=${1%.*}
+            local target=${1%.*}
+        fi
+
+        if [[ -e $target ]]; then
+            error "Destination '$target' already exists. Unable to unpack '$1'..."
+            exit 1
         fi
 
         dpkg-deb --raw-extract "$1" "$target"
     # if argument is an installed package
     elif dpkg-query --status "$1" 2>/dev/null | grep -q '^Status: install ok installed$'; then
+        local pkgtype=installation
         if [[ -n $2 ]]; then
-            target=$2
+            local target=$2
         else
-            target=$1
+            local target=$1
         fi
 
-        if [[ -d $target ]]; then
-            error "Folder named '$target' already exists"
+        if [[ -e $target ]]; then
+            error "Destination '$target' already exists. Unable to unpack '$1'..."
             exit 1
         fi
 
-        folder=$(fakeroot -u dpkg-repack --generate "$1" 2>/dev/null | awk '{print $(NF-2)}')
+        local folder=$(fakeroot -u dpkg-repack --generate "$1" 2>/dev/null | awk '{print $(NF-2)}')
         mv "$folder" "$target"
 
         if [[ ! -d $target ]]; then
@@ -85,23 +113,35 @@ generate(){
         fi
         exit 1
     fi
+
+    if [[ -e $target ]]; then
+        echo "Successfully unpacked $pkgtype: $target"
+        return 0
+    fi
 }
 
 
-if [[ $# -le 1 || $1 =~ ^(-h|--help|help)$ ]]; then
+if (( $# == 0 )); then
+    error "Missing operand"
+    echo "Try 'chmod --help' for more information." >&2
+    exit 1
+elif [[ $# -le 1 || $1 =~ ^(-h|--help|help)$ ]]; then
     echo "Usage: ${0##*/} OPTION [ARCHIVE|DIRECTORY|PACKAGE] [TARGET]"
     echo "Manipulate debian archives."
     echo
     echo "  -b, --build           create a debian archive from DIRECTORY"
-    echo "  -d, --download        download PACKAGE via apt-get"
-    echo "  -g, --generate        unpack ARCHIVE or PACKAGE into "
+    echo "  -c, --combo           download then unpack PACKAGE (supports multiple)"
+    echo "  -d, --download        download PACKAGE via apt-get (supports multiple)"
+    echo "  -g, --generate        unpack ARCHIVE or PACKAGE into DIRECTORY"
     exit 0
 elif [[ $1 =~ ^(-b|--build)$ ]]; then
-    build "${@:2}"
+    build "$2"
+elif [[ $1 =~ ^(-c|--combo)$ ]]; then
+    combo "${@:2}"
 elif [[ $1 =~ ^(-d|--download)$ ]]; then
     download "${@:2}"
 elif [[ $1 =~ ^(-g|--generate)$ ]]; then
-    generate "${@:2}"
+    generate "$2"
 else
     error "Invalid option"
     exit 1
