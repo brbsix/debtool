@@ -8,12 +8,12 @@ Installation
 
 Copy debtool to /usr/local/bin and mark as executable.
    
-    ```sudo chmod a+x /usr/local/bin/debtool```
+    sudo chmod a+x /usr/local/bin/debtool
 
 Requirements
 ------------
 
-The following applications are required:
+Ensure that the following packages are installed on your system.
 
     apt
     dpkg
@@ -21,8 +21,6 @@ The following applications are required:
 
 Usage
 -----
-
-Run `debtool --help` to see all options.
 
     Usage: debtool OPTION [ARCHIVE|DIRECTORY|PACKAGE] [TARGET]
     Manipulate debian archives.
@@ -34,35 +32,35 @@ Run `debtool --help` to see all options.
 
 To download a debian package (from sources):
 
-    ```debtool --download unar```
+    debtool --download unar
 
 You can even supply multiple package names at once if you'd like...
 
-    ```debtool --download git mawk unar
+    debtool --download git mawk unar
 
 To unpack the debian package:
 
-    ```debtool --unpack unar_1.8.1-2_amd64.deb```
+    debtool --unpack unar_1.8.1-2_amd64.deb
 
 Or unpack the deb package to a particular directory:
 
-    ```debtool --unpack unar_1.8.1-2_amd64.deb unar```
+    debtool --unpack unar_1.8.1-2_amd64.deb unar
 
 You can even unpack an already installed package. If you've modified installed files, these changes will be incorporated:
 
-    ```debtool --unpack mawk```
+    debtool --unpack mawk
 
 There is also a combo command to download (from sources) and unpack at once:
 
-    ```debtool --combo git mawk unar```
+    debtool --combo git mawk unar
 
 After you've made changes to the files (updating md5sums if necessary), you may rebuild the package:
 
-    ```debtool --build PACKAGEDIR```
+    debtool --build PACKAGEDIR
 
 You can specify a destination filename as follows if you'd like (otherwise the script will generate a suitable one):
 
-    ```debtool --build PACKAGEDIR package.deb
+    debtool --build PACKAGEDIR package.deb
 
 License
 -------
