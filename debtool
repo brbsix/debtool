@@ -1,0 +1,108 @@
+#!/bin/bash
+#
+# Simple tool to facilitate downloading and repacking debian archives
+
+
+build(){
+    if [[ -d $1 ]]; then
+        if [[ -n $2 ]]; then
+            target=$2
+        else
+            package=$(grep -oP '(?<=Package: ).+' "$1/DEBIAN/control")
+            version=$(grep -oP '(?<=Version: ).+' "$1/DEBIAN/control")
+            arch=$(grep -oP '(?<=Architecture: ).+' "$1/DEBIAN/control")
+            target=${package}_${version}_${arch}.deb
+        fi
+        fakeroot dpkg-deb --build "$1" "$target"
+    else
+        if [[ -n $1 ]]; then
+            error "'$1' is not a directory"
+        else
+            error "You have not supplied a directory"
+        fi
+        exit 1
+    fi
+}
+
+download(){
+    for package in "$@"; do
+        if apt-get download "$package" &>/dev/null; then
+            successes+=("$package")
+        else
+            failures+=("$package")
+        fi
+    done
+
+    if (( ${#successes[@]} > 0 )); then
+        echo "Successfully downloaded: ${successes[@]}"
+    fi
+
+    if (( ${#failures[@]} > 0 )); then
+        echo "Failed to download: ${failures[@]}"
+        exit 1
+    fi
+}
+
+error(){
+    echo "ERROR: $@" >&2
+}
+
+generate(){
+    # if argument is a debian archive file
+    if dpkg-deb --info "$1" &>/dev/null; then
+        if [[ -n $2 ]]; then
+            target=$2
+        else
+            target=${1%.*}
+        fi
+
+        dpkg-deb --raw-extract "$1" "$target"
+    # if argument is an installed package
+    elif dpkg-query --status "$1" 2>/dev/null | grep -q '^Status: install ok installed$'; then
+        if [[ -n $2 ]]; then
+            target=$2
+        else
+            target=$1
+        fi
+
+        if [[ -d $target ]]; then
+            error "Folder named '$target' already exists"
+            exit 1
+        fi
+
+        folder=$(fakeroot -u dpkg-repack --generate "$1" 2>/dev/null | awk '{print $(NF-2)}')
+        mv "$folder" "$target"
+
+        if [[ ! -d $target ]]; then
+            error "Failed to generate folder '$target' for '$1'"
+            exit 1
+        fi
+    else
+        if [[ -n $1 ]]; then
+            error "'$1' is not an installed package or valid debian archive"
+        else
+            error "You have not supplied a package to generate"
+        fi
+        exit 1
+    fi
+}
+
+
+if [[ $# -le 1 || $1 =~ ^(-h|--help|help)$ ]]; then
+    echo "Usage: ${0##*/} OPTION [ARCHIVE|DIRECTORY|PACKAGE] [TARGET]"
+    echo "Manipulate debian archives."
+    echo
+    echo "  -b, --build           create a debian archive from DIRECTORY"
+    echo "  -d, --download        download PACKAGE via apt-get"
+    echo "  -g, --generate        unpack ARCHIVE or PACKAGE into "
+    exit 0
+elif [[ $1 =~ ^(-b|--build)$ ]]; then
+    build "${@:2}"
+elif [[ $1 =~ ^(-d|--download)$ ]]; then
+    download "${@:2}"
+elif [[ $1 =~ ^(-g|--generate)$ ]]; then
+    generate "${@:2}"
+else
+    error "Invalid option"
+    exit 1
+fi
