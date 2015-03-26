@@ -71,7 +71,7 @@ error(){
 
 prepare(){
     if [[ -f $1/DEBIAN/md5sums ]]; then
-        ( cd "$1" && find -type f ! -regex '\./DEBIAN/.*' -printf '%P\0' | sort -z | xargs -0r md5sum > DEBIAN/md5sums )
+        ( cd "$1" && find -type f ! -regex '\./DEBIAN/.*' ! -regex '\./etc/.*' -printf '%P\0' | sort -z | xargs -0r md5sum > DEBIAN/md5sums )
     fi
 }
 
