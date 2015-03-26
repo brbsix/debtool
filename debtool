@@ -105,13 +105,12 @@ unpack(){
             exit 1
         fi
 
-        local folder=$(fakeroot -u dpkg-repack --generate "$1" 2>/dev/null | awk '{print $(NF-2)}')
-        mv "$folder" "$target"
+        # unpack into tmpfolder
+        local tmpfolder=$(fakeroot -u dpkg-repack --generate "$1" 2>/dev/null | awk '{print $(NF-2)}')
 
-        if [[ ! -d $target ]]; then
-            error "Failed to generate folder '$target' for '$1'"
-            exit 1
-        fi
+        # rename tmpfolder to target then clean up control file modified by dpkg-repack
+        mv "$tmpfolder" "$target" 2>/dev/null && \
+        sed -i 's/ .$//;/ (Repackaged on .* by dpkg-repack.)/d' "$target/DEBIAN/control" 2>/dev/null
     else
         if [[ -n $1 ]]; then
             error "'$1' is not an installed package or valid debian archive"
