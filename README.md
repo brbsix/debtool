@@ -59,7 +59,7 @@ There is also a combo command to download and unpack at the same time:
 
     debtool --combo git mawk unar
 
-After you've made changes to the contents, you may rebuild the package. *NOTE: md5sums will be updated if necessary*
+After you've made changes to the contents, you may rebuild the package. As part of the (re)build process, md5sums will be updated (if necessary) and any uncompressed manpages will be gzip'd. If you need to do much more than that, you should probably be using debhelper anyways.
 
     debtool --build PACKAGEDIR
 
