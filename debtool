@@ -3,6 +3,7 @@
 # Simple tool to facilitate downloading and repacking debian archives
 
 
+# create a debian archive from a directory
 build(){
     if [[ -d $1 ]]; then
         prep "$1"
@@ -39,13 +40,24 @@ build(){
     fi
 }
 
+# download package(s) via apt-get then unpack
 combo(){
     for package in "$@"; do
+
+        # generate pre-download directory listing
         local pre=$(find -maxdepth 1 -type f -iname '*.deb')
+
         download "$package"
+
+        # generate post-download directory listing
         local post=$(find -maxdepth 1 -type f -iname '*.deb')
+
+        # identify additional files
         local dirdiff=$(grep -Fxvf <(echo "$pre") <(echo "$post"))
+
+        # count additional files
         local count=$(wc -l <<<"$dirdiff")
+
         if (( count == 0 )); then
             error "Could not identify downloaded package. Unable to unpack '$package'..."
             exit 1
@@ -55,9 +67,11 @@ combo(){
             error "Appear to have download multiple packages. Unable to unpack '$package'..."
             exit 1
         fi
+
     done
 }
 
+# download package(s) via apt-get
 download(){
     local successes
     local failures
@@ -91,8 +105,9 @@ prep(){
     fi
 }
 
+# unpack a debian archive or installed package
 unpack(){
-    # if argument is a debian archive file
+    # for a debian archive file
     if dpkg-deb --info "$1" &>/dev/null; then
         local pkgtype=archive
         if [[ -n $2 ]]; then
@@ -107,7 +122,7 @@ unpack(){
         fi
 
         dpkg-deb --raw-extract "$1" "$target"
-    # if argument is an installed package
+    # for an installed package
     elif dpkg-query --status "$1" 2>/dev/null | grep -q '^Status: install ok installed$'; then
         local pkgtype=installation
         if [[ -n $2 ]]; then
