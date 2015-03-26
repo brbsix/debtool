@@ -24,12 +24,7 @@ build(){
         fi
 
         # build the archive
-        if fakeroot dpkg-deb --build "$1" "$archive"; then
-            echo "Successful build of '$1' to '$archive'"
-        else
-            error "Failed to build '$1'"
-            exit 1
-        fi
+        fakeroot dpkg-deb --build "$1" "$archive"
     else
         if [[ -n $1 ]]; then
             error "'$1' is not a directory"
