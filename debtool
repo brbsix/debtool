@@ -124,8 +124,18 @@ prep(){
     # enter directory
     cd "$1"
 
-    # compress manpages if necessary
-    find -type f -regex '\./usr/share/man/.*' -name '*.[1-9]' ! -name '*.gz' -print0 | xargs -0r gzip -9fn
+    # compress manpages (if necessary)
+    # find -type f -regex '\./usr/share/man/.*' -name '*.[1-9]' ! -name '*.gz' -print0 | xargs -0r gzip -9fn
+
+    # verify write access then compress manpages (if necessary)
+    while IFS= read -rd $'\0' manpage; do
+        if [[ -w $manpage ]]; then
+            gzip -9fn "$manpage"
+        else
+            error "No write access to '$manpage'"
+            return 1
+        fi
+    done < <(find -type f -regex '\./usr/share/man/.*' -name '*.[1-9]' ! -name '*.gz' -print0)
 
     # update md5sums if necessary
     if [[ -f DEBIAN/md5sums ]]; then
