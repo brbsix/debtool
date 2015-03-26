@@ -95,8 +95,15 @@ error(){
 # prepare directory prior to build
 prep(){
     # update md5sums if necessary
-    if [[ -f $1/DEBIAN/md5sums ]]; then
-        ( cd "$1" && find -type f ! -regex '\./DEBIAN/.*' ! -regex '\./etc/.*' -printf '%P\0' | sort -z | xargs -0r md5sum > DEBIAN/md5sums )
+    if [[ -f DEBIAN/md5sums ]]; then
+        # disregard original and generate new md5sums
+        # find -type f ! -regex '\./DEBIAN/.*' ! -regex '\./etc/.*' -printf '%P\0' | LC_ALL=C sort -z | xargs -0r md5sum > DEBIAN/md5sums
+
+        # use original md5sums as a template
+        mv "DEBIAN/md5sums" "DEBIAN/md5sums~"
+        awk '{printf "%s\0", $2}' "DEBIAN/md5sums~" | xargs -0r md5sum > DEBIAN/md5sums
+        rm "DEBIAN/md5sums~"
+        chmod 644 "DEBIAN/md5sums"
     fi
 }
 
