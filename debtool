@@ -136,9 +136,12 @@ unpack(){
         exit 1
     fi
 
-    if [[ -e $target ]]; then
+    # check if target directory exists
+    if [[ -d $target ]]; then
         echo "Successfully unpacked $pkgtype: $target"
-        return 0
+    else
+        error "Failed to generate folder '$target' for '$1'"
+        exit 1
     fi
 }
 
