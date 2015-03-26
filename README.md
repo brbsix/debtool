@@ -2,13 +2,12 @@
 
 debtool is a wrapper around several other utilities that aims to simplify the workflow for downloading, unpacking, and repacking debian packages. It is especially handy if you just want to incorporate quick bug fixes, fix or remove unwanted package requirements, etc without the trouble of downloading sources. You can even rebuild packages that are no longer available in the apt repositories (so long as you have them installed).
 
-
 Installation
 ------------
 
-Copy debtool to /usr/local/bin and mark as executable.
-   
-    sudo chmod a+x /usr/local/bin/debtool
+To install debtool on Linux systems:
+
+    sudo install debtool /usr/local/bin
 
 Requirements
 ------------
@@ -54,7 +53,7 @@ There is also a combo command to download and unpack at the same time:
 
     debtool --combo git mawk unar
 
-After you've made changes to the contents (updating md5sums if necessary), you may rebuild the package:
+After you've made changes to the contents, you may rebuild the package. *NOTE: md5sums will be updated if necessary*
 
     debtool --build PACKAGEDIR
 
