@@ -172,7 +172,7 @@ unpack(){
         fi
 
         if [[ -e $target ]]; then
-            error "Destination '$target' already exists. Unable to unpack '$1'..."
+            error "Unable to unpack '$1' (destination already exists)."
             exit 1
         fi
 
@@ -187,7 +187,7 @@ unpack(){
         fi
 
         if [[ -e $target ]]; then
-            error "Destination '$target' already exists. Unable to unpack '$1'..."
+            error "Unable to unpack '$1' (destination already exists)."
             exit 1
         fi
 
@@ -206,10 +206,8 @@ unpack(){
         exit 1
     fi
 
-    # check if target directory exists
-    if [[ -d $target ]]; then
-        echo "Successfully unpacked $pkgtype: $target"
-    else
+    # check for target directory and exit now if missing
+    if [[ ! -d $target ]]; then
         error "Failed to generate folder '$target' for '$1'"
         exit 1
     fi
