@@ -16,7 +16,10 @@ Ensure that the following packages are installed on your system.
 
     apt
     dpkg
+    dpkg-repack
     fakeroot
+
+NOTE: `dpkg-repack` is only used to unpack installed packages. It is not necessary for any other actions.
 
 Usage
 -----
@@ -24,10 +27,13 @@ Usage
     Usage: debtool OPTION [ARCHIVE|DIRECTORY|PACKAGE] [TARGET]
     Manipulate debian archives.
 
-      -b, --build           create a debian archive from DIRECTORY
-      -c, --combo           download then unpack PACKAGE (supports multiple)
-      -d, --download        download PACKAGE via apt-get (supports multiple)
-      -u, --unpack          unpack ARCHIVE or PACKAGE into DIRECTORY
+      -b, --build           create a debian archive from DIR
+      -c, --combo           download then unpack PKG(s)
+      -d, --download        download PKGS(s) via apt-get
+      -u, --unpack          unpack ARCHIVE or installed PKG into DIR
+
+    NOTE: ARCHIVE refers to a '.deb' debian archive. PKG refers to program
+          available to download or an installed program to unpack.
 
 To download a debian package (from apt sources):
 
