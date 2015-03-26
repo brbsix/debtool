@@ -94,6 +94,13 @@ error(){
 
 # prepare directory prior to build
 prep(){
+    (
+    # enter directory
+    cd "$1"
+
+    # compress manpages if necessary
+    find -type f -regex '\./usr/share/man/.*' -name '*.[1-9]' ! -name '*.gz' -print0 | xargs -0r gzip -9fn
+
     # update md5sums if necessary
     if [[ -f DEBIAN/md5sums ]]; then
         # disregard original and generate new md5sums
@@ -105,6 +112,7 @@ prep(){
         rm "DEBIAN/md5sums~"
         chmod 644 "DEBIAN/md5sums"
     fi
+    )
 }
 
 # unpack a debian archive or installed package
