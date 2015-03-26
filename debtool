@@ -5,7 +5,8 @@
 
 build(){
     if [[ -d $1 ]]; then
-        prepare "$1"
+        prep "$1"
+
         if [[ -n $2 ]]; then
             local target=$2
         else
@@ -69,7 +70,9 @@ error(){
     echo "ERROR: $@" >&2
 }
 
-prepare(){
+# prepare directory prior to build
+prep(){
+    # update md5sums if necessary
     if [[ -f $1/DEBIAN/md5sums ]]; then
         ( cd "$1" && find -type f ! -regex '\./DEBIAN/.*' ! -regex '\./etc/.*' -printf '%P\0' | sort -z | xargs -0r md5sum > DEBIAN/md5sums )
     fi
