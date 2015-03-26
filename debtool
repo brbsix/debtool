@@ -40,26 +40,52 @@ combo(){
     for package in "$@"; do
 
         # generate pre-download directory listing
-        local pre=$(find -maxdepth 1 -type f -iname '*.deb')
+        local pre=$(find -maxdepth 1 -type f -iname '*.deb' -printf '%C@ %p\n')
 
         download "$package"
 
         # generate post-download directory listing
-        local post=$(find -maxdepth 1 -type f -iname '*.deb')
+        local post=$(find -maxdepth 1 -type f -iname '*.deb' -printf '%C@ %p\n')
 
         # identify additional files
-        local dirdiff=$(grep -Fxvf <(echo "$pre") <(echo "$post"))
+        local dirdiff=$(grep -Fxvf <(echo "$pre") <(echo "$post") | cut -d' ' -f2)
 
         # count additional files
-        local count=$(wc -l <<<"$dirdiff")
+        if [[ -n $dirdiff ]]; then
+            local filecount=$(wc -l <<<"$dirdiff")
+        else
+            local filecount=0
+        fi
 
-        if (( count == 0 )); then
-            error "Could not identify downloaded package. Unable to unpack '$package'..."
-            exit 1
-        elif (( count == 1 )); then
+        # did not identify a download (can occur if archive already exists)
+        if (( filecount == 0 )); then
+            error "There do not appear to be any newly downloaded packages."
+
+            # attempt to identify pre-existing archive by name
+            local plausible=$(find -maxdepth 1 -type f -name "${package}*.deb" 2>/dev/null)
+
+            # count pre-existing archives
+            if [[ -n $plausible ]]; then
+                local plauscount=$(wc -l <<<"$plausible")
+            else
+                local plauscount=0
+            fi
+
+            # prompt for installation of pre-existing archive
+            if (( plauscount == 1 )); then
+                read -p "Would you like to unpack pre-existing archive '$plausible'? "
+                if [[ ${REPLY,} = y ]]; then
+                    unpack "$plausible"
+                fi
+            else
+                exit 1
+            fi
+        # identified a download (desired behavior)
+        elif (( filecount == 1 )); then
             unpack "$dirdiff"
-        elif (( count >= 2 )); then
-            error "Appear to have download multiple packages. Unable to unpack '$package'..."
+        # detected multiple downloads (should not happen)
+        elif (( filecount >= 2 )); then
+            error "There appear to be multiple downloaded package."
             exit 1
         fi
 
