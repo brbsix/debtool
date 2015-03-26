@@ -135,10 +135,13 @@ elif (( $# == 1 )) && [[ $1 =~ ^(-h|--help|help)$ ]]; then
     echo "Usage: ${0##*/} OPTION [ARCHIVE|DIRECTORY|PACKAGE] [TARGET]"
     echo "Manipulate debian archives."
     echo
-    echo "  -b, --build           create a debian archive from DIRECTORY"
-    echo "  -c, --combo           download then unpack PACKAGE (supports multiple)"
-    echo "  -d, --download        download PACKAGE via apt-get (supports multiple)"
-    echo "  -u, --unpack          unpack ARCHIVE or PACKAGE into DIRECTORY"
+    echo "  -b, --build           create a debian archive from DIR"
+    echo "  -c, --combo           download then unpack PKG(s)"
+    echo "  -d, --download        download PKGS(s) via apt-get"
+    echo "  -u, --unpack          unpack ARCHIVE or installed PKG into DIR"
+    echo
+    echo "NOTE: ARCHIVE refers to a '.deb' debian archive. PKG refers to" \
+         "program available to download or an installed program to unpack."
     exit 0
 elif [[ $1 =~ ^(-b|--build)$ ]]; then
     build "${@:2}"
