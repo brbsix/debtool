@@ -131,7 +131,7 @@ if (( $# == 0 )); then
     error "Missing operand"
     echo "Try 'chmod --help' for more information." >&2
     exit 1
-elif [[ $# -le 1 || $1 =~ ^(-h|--help|help)$ ]]; then
+elif (( $# == 1 )) && [[ $1 =~ ^(-h|--help|help)$ ]]; then
     echo "Usage: ${0##*/} OPTION [ARCHIVE|DIRECTORY|PACKAGE] [TARGET]"
     echo "Manipulate debian archives."
     echo
