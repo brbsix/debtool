@@ -24,7 +24,7 @@ build(){
         fi
 
         # build the archive
-        fakeroot dpkg-deb --build "$1" "$archive"
+        fakeroot dpkg-deb --build "${1%/}" "$archive"
     else
         if [[ -n $1 ]]; then
             error "'$1' is not a directory"
