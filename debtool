@@ -133,6 +133,7 @@ prep(){
     # verify write access then compress manpages (if necessary)
     while IFS= read -rd $'\0' manpage; do
         if [[ -w $manpage ]]; then
+            chmod 0644 "$manpage"
             gzip -9fn "$manpage"
         else
             error "No write access to '$manpage'"
