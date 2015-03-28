@@ -17,9 +17,12 @@ build(){
                 error "'$1' is missing control file"
                 exit 1
             fi
-            local package=$(grep -oP '(?<=Package: ).+' "$control")
-            local version=$(grep -oP '(?<=Version: ).+' "$control")
-            local arch=$(grep -oP '(?<=Architecture: ).+' "$control")
+            # local package=$(grep -oP '(?<=Package: ).+' "$control")
+            local package=$(awk '/^Package: / {print $2; exit}' "$control")
+            # local version=$(grep -oP '(?<=Version: ).+' "$control")
+            local version=$(awk '/^Version: / {print $2; exit}' "$control")
+            # local arch=$(grep -oP '(?<=Architecture: ).+' "$control")
+            local arch=$(awk '/^Architecture: / {print $2; exit}' "$control")
             local archive=${package}_${version}_${arch}.deb
         fi
 
