@@ -181,7 +181,7 @@ unpack(){
 
         dpkg-deb --raw-extract "$1" "$target"
     # for an installed package
-    elif dpkg-query --status "$1" 2>/dev/null | grep -q '^Status: install ok installed$'; then
+    elif dpkg-query --show --showformat='${Status}' "$1" 2>/dev/null | grep -Fq 'install ok installed'; then
         local pkgtype=installation
         if [[ -n $2 ]]; then
             local target=$2
