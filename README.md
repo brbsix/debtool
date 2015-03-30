@@ -8,6 +8,7 @@ Installation
 To install debtool on Linux systems:
 
     sudo install debtool /usr/local/bin
+    sudo install -m 0644 debtool-completion /etc/bash_completion.d/debtool
 
 Requirements
 ------------
