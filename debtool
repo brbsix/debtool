@@ -17,13 +17,10 @@ build(){
                 error "'$1' is missing control file"
                 exit 1
             fi
-            # local package=$(grep -oP '(?<=Package: ).+' "$control")
-            local package=$(awk '/^Package: / {print $2; exit}' "$control")
-            # local version=$(grep -oP '(?<=Version: ).+' "$control")
-            local version=$(awk '/^Version: / {print $2; exit}' "$control")
-            # local arch=$(grep -oP '(?<=Architecture: ).+' "$control")
-            local arch=$(awk '/^Architecture: / {print $2; exit}' "$control")
-            local archive=${package}_${version}_${arch}.deb
+
+            # determine archive name from contents of control file
+            local archive=$(awk '/^Package: / { p=$2 }; /^Version: / { v=$2 }; /^Architecture: / { a=$2 }; END{ if ( length(a) > 0 ) { printf "%s_%s_%s.deb", p, v, a } else { printf "%s_%s.deb", p, v } }' "$control")
+
         fi
 
         # build the archive
