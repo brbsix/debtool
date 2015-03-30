@@ -153,9 +153,44 @@ prep(){
             error "No write access to 'DEBIAN/md5sum'"
             return 1
         fi
+
     fi
 
     ) || exit 1
+}
+
+# reinstall package(s)
+reinst(){
+    for archive in "$@"; do
+
+        # confirm archive is a file
+        if [[ ! -f $archive ]]; then
+            error "'$archive' does not appear to be a valid file"
+            continue
+        fi
+
+        # lookup package name in archive control file
+        package=$(dpkg-deb -f "$archive" package 2>/dev/null)
+
+        # confirm lookup of package name was successful
+        if [[ -z $package ]]; then
+            error "'$archive' does not appear to be a valid debian archive"
+            continue
+        fi
+
+        # if sudo apt-get purge "$package" &>/dev/null; then
+        if sudo dpkg --purge "$package" &>/dev/null; then
+            echo "dpkg: purged '$package'"
+        else
+            echo "dpkg: failed to purge '$package' (perhaps it was not installed)"
+        fi
+
+        if sudo dpkg --install "$archive" &>/dev/null; then
+            echo "dpkg: installed '$package' ($archive)"
+        else
+            echo "dpkg: failed to install '$package' ($archive)"
+        fi
+    done
 }
 
 # unpack a debian archive or installed package
@@ -235,13 +270,14 @@ elif (( $# == 1 )) && [[ $1 =~ ^(-h|--help|help)$ ]]; then
     echo "  -b, --build           create a debian archive from DIR"
     echo "  -c, --combo           download then unpack PKG(s)"
     echo "  -d, --download        download PKGS(s) via apt-get"
+    echo "  -r, --reinst          reinstall debian ARCHIVE(s)"
     echo "  -u, --unpack          unpack ARCHIVE or installed PKG into DIR"
     echo
     echo "NOTE: ARCHIVE refers to a '.deb' debian archive. PKG refers to" \
          "program available to download or an installed program to unpack."
     exit 0
 else
-    parameters=$(getopt -o b,c,d,u -l build,combo,download,unpack -n "${0##*/}" -- "$@")
+    parameters=$(getopt -o b,c,d,r,u -l build,combo,download,reinst,unpack -n "${0##*/}" -- "$@")
     eval set -- "$parameters"
 
     while true; do
@@ -256,6 +292,10 @@ else
                 ;;
             -d|--download)
                 cmd='download'
+                shift
+                ;;
+            -r|--reinst)
+                cmd='reinst'
                 shift
                 ;;
             -u|--unpack)
@@ -284,6 +324,9 @@ else
             ;;
         download)
             download "$@"
+            ;;
+        reinst)
+            reinst "$@"
             ;;
         unpack)
             unpack "$@"

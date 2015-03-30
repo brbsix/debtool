@@ -31,6 +31,7 @@ Usage
       -b, --build           create a debian archive from DIR
       -c, --combo           download then unpack PKG(s)
       -d, --download        download PKGS(s) via apt-get
+      -r, --reinst          reinstall ARCHIVE(s)
       -u, --unpack          unpack ARCHIVE or installed PKG into DIR
 
     NOTE: ARCHIVE refers to a '.deb' debian archive. PKG refers to program
@@ -67,6 +68,10 @@ After you've made changes to the contents, you may rebuild the package. As part 
 You can specify a destination filename as follows if you'd like (otherwise the script will generate a suitable one):
 
     debtool --build PACKAGEDIR package.deb
+
+After you've made changes, you can rapidly reinstall (purge then install) the indicated archive:
+
+    debtool --reinst package.deb
 
 License
 -------
