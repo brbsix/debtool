@@ -266,7 +266,7 @@ if (( $# == 1 )) && [[ $1 =~ ^(-h|--help|help)$ ]]; then
     echo "  -b, --build           create a debian archive from DIR"
     echo "  -c, --combo           download then unpack PKG(s)"
     echo "  -d, --download        download PKGS(s) via apt-get"
-    echo "  -r, --reinst          reinstall debian ARCHIVE(s)"
+    echo "  -r, --reinst          reinstall ARCHIVE(s)"
     echo "  -u, --unpack          unpack ARCHIVE or installed PKG into DIR"
     echo
     echo "NOTE: ARCHIVE refers to a '.deb' debian archive. PKG refers to" \
