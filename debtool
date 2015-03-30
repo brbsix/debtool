@@ -166,7 +166,7 @@ unpack(){
         if [[ -n $2 ]]; then
             local target=$2
         else
-            local target=${1%.*}
+            local target=$(dpkg-deb --field "$1" package version architecture | awk '{print $2}' | paste -sd_)
         fi
 
         if [[ -e $target ]]; then
