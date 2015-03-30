@@ -269,6 +269,12 @@ else
         esac
     done
 
+    if (( $# == 0 )); then
+        error "Missing operand"
+        echo "Try 'chmod --help' for more information." >&2
+        exit 1
+    fi
+
     case "$cmd" in
         build)
             build "$@"
