@@ -272,102 +272,60 @@ if (( $# == 1 )) && [[ $1 =~ ^(-h|--help|help)$ ]]; then
     echo "NOTE: ARCHIVE refers to a '.deb' debian archive. PKG refers to" \
          "program available to download or an installed program to unpack."
     exit 0
-else
-    parameters=$(getopt -o b,c,d,r,u -l build,combo,download,reinst,unpack -n "${0##*/}" -- "$@")
-    eval set -- "$parameters"
-
-    while true; do
-        case "$1" in
-            -b|--build)
-                cmd='build'
-                shift
-                ;;
-            -c|--combo)
-                cmd='combo'
-                shift
-                ;;
-            -d|--download)
-                cmd='download'
-                shift
-                ;;
-            -r|--reinst)
-                cmd='reinst'
-                shift
-                ;;
-            -u|--unpack)
-                cmd='unpack'
-                shift
-                ;;
-            --)
-                shift
-                break
-                ;;
-        esac
-    done
-
-    if (( $# == 0 )); then
-        error "Missing operand"
-        echo "Try 'chmod --help' for more information." >&2
-        exit 1
-    fi
-
-    case "$cmd" in
-        build)
-            build "$@"
-            ;;
-        combo)
-            combo "$@"
-            ;;
-        download)
-            download "$@"
-            ;;
-        reinst)
-            reinst "$@"
-            ;;
-        unpack)
-            unpack "$@"
-            ;;
-    esac
 fi
 
-# if (( $# == 0 )); then
-#     error "Missing operand"
-#     echo "Try 'chmod --help' for more information." >&2
-#     exit 1
-# elif (( $# == 1 )) && [[ $1 =~ ^(-h|--help|help)$ ]]; then
-#     echo "Usage: ${0##*/} OPTION [ARCHIVE|DIRECTORY|PACKAGE] [TARGET]"
-#     echo "Manipulate debian archives."
-#     echo
-#     echo "  -b, --build           create a debian archive from DIR"
-#     echo "  -c, --combo           download then unpack PKG(s)"
-#     echo "  -d, --download        download PKGS(s) via apt-get"
-#     echo "  -u, --unpack          unpack ARCHIVE or installed PKG into DIR"
-#     echo
-#     echo "NOTE: ARCHIVE refers to a '.deb' debian archive. PKG refers to" \
-#          "program available to download or an installed program to unpack."
-#     exit 0
-# elif [[ $1 =~ ^(-b|--build)$ ]]; then
-#     build "${@:2}"
-# elif [[ $1 =~ ^(-c|--combo)$ ]]; then
-#     combo "${@:2}"
-# elif [[ $1 =~ ^(-d|--download)$ ]]; then
-#     download "${@:2}"
-# elif [[ $1 =~ ^(-u|--unpack)$ ]]; then
-#     unpack "${@:2}"
-# else
-#     error "Invalid option"
-#     exit 1
-# fi
+parameters=$(getopt -o b,c,d,r,u -l build,combo,download,reinst,unpack -n "${0##*/}" -- "$@")
+eval set -- "$parameters"
 
-# elif [[ $1 =~ ^(-b|--build)$ ]]; then
-#     build "${@:2}"
-# elif [[ $1 =~ ^(-c|--combo)$ ]]; then
-#     combo "${@:2}"
-# elif [[ $1 =~ ^(-d|--download)$ ]]; then
-#     download "${@:2}"
-# elif [[ $1 =~ ^(-u|--unpack)$ ]]; then
-#     unpack "${@:2}"
-# else
-#     error "Invalid option"
-#     exit 1
-# fi
+while true; do
+    case "$1" in
+        -b|--build)
+            cmd='build'
+            shift
+            ;;
+        -c|--combo)
+            cmd='combo'
+            shift
+            ;;
+        -d|--download)
+            cmd='download'
+            shift
+            ;;
+        -r|--reinst)
+            cmd='reinst'
+            shift
+            ;;
+        -u|--unpack)
+            cmd='unpack'
+            shift
+            ;;
+        --)
+            shift
+            break
+            ;;
+    esac
+done
+
+if (( $# == 0 )); then
+    error "Missing operand"
+    echo "Try 'chmod --help' for more information." >&2
+    exit 1
+fi
+
+case "$cmd" in
+    build)
+        build "$@"
+        ;;
+    combo)
+        combo "$@"
+        ;;
+    download)
+        download "$@"
+        ;;
+    reinst)
+        reinst "$@"
+        ;;
+    unpack)
+        unpack "$@"
+        ;;
+esac
