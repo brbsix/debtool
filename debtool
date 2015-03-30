@@ -42,54 +42,48 @@ build(){
 combo(){
     for package in "$@"; do
 
-        # generate pre-download directory listing
-        local pre=$(find -maxdepth 1 -type f -iname '*.deb' -printf '%C@ %p\n')
+        # aquire the package destination filename
 
-        download "$package"
+        # NOTE: apt-get will output nothing if package exists in the
+        #       current directory, hence the need to cd out if. This
+        #       is quite hackish but the alternative would be manually
+        #       parsing `apt-cache show "$package"`.
 
-        # generate post-download directory listing
-        local post=$(find -maxdepth 1 -type f -iname '*.deb' -printf '%C@ %p\n')
+        local dest=$(cd / && apt-get --print-uris download "$package" 2>/dev/null | awk '{print $2}')
 
-        # identify additional files
-        local dirdiff=$(grep -Fxvf <(echo "$pre") <(echo "$post") | cut -d' ' -f2)
-
-        # count additional files
-        if [[ -n $dirdiff ]]; then
-            local filecount=$(wc -l <<<"$dirdiff")
-        else
-            local filecount=0
+        # confirm apt-get was able to determing package destination filename
+        if (( $? != 0 )) || [[ -z $dest ]]; then
+            error "Failed to identify '$package' for download"
+            continue
         fi
 
-        # did not identify a download (can occur if archive already exists)
-        if (( filecount == 0 )); then
-            error "There do not appear to be any newly downloaded packages."
+        # store apt-get output log to determing if download occurred
 
-            # attempt to identify pre-existing archive by name
-            local plausible=$(find -maxdepth 1 -type f -name "${package}*.deb" 2>/dev/null)
+        # NOTE: We are using apt-get to download even if $dest already
+        #       exists because apt-get is intelligent and will only
+        #       re-download if neccesary (i.e. file checksum mismatch).
 
-            # count pre-existing archives
-            if [[ -n $plausible ]]; then
-                local plauscount=$(wc -l <<<"$plausible")
-            else
-                local plauscount=0
+        local output=$(apt-get -q download "$package" 2>/dev/null)
+
+        # confirm apt-get exited successfully
+        if (( $? != 0 )); then
+            error "apt-get experienced an error downloading '$package'"
+            continue
+        # confirm download exists
+        elif [[ ! -f $dest ]]; then
+            error "Failed to download '$package'"
+            continue
+        fi
+
+        # unpack downloaded package
+        if [[ -n $output ]]; then
+            unpack "$dest"
+        # prompt to unpack pre-existing package
+        else
+            read -p "Would you like to unpack pre-existing archive '$dest'? "
+            if [[ ${REPLY,} = y ]]; then
+                unpack "$dest"
             fi
-
-            # prompt for installation of pre-existing archive
-            if (( plauscount == 1 )); then
-                read -p "Would you like to unpack pre-existing archive '$plausible'? "
-                if [[ ${REPLY,} = y ]]; then
-                    unpack "$plausible"
-                fi
-            else
-                exit 1
-            fi
-        # identified a download (desired behavior)
-        elif (( filecount == 1 )); then
-            unpack "$dirdiff"
-        # detected multiple downloads (should not happen)
-        elif (( filecount >= 2 )); then
-            error "There appear to be multiple downloaded package."
-            exit 1
         fi
 
     done
