@@ -11,8 +11,11 @@ build(){
         if [[ -n $2 ]]; then
             local archive=$2
         else
-            # generate archive name from control file
+
+            # identify archive control file
             control=$1/DEBIAN/control
+
+            # confirm existence of archive control
             if [[ ! -f $control || ! -r $control || ! -s $control ]]; then
                 error "'$1' is missing control file"
                 exit 1
@@ -60,7 +63,7 @@ combo(){
         #       exists because apt-get is intelligent and will only
         #       re-download if neccesary (i.e. file checksum mismatch).
 
-        local output=$(apt-get -q download "$package" 2>/dev/null)
+        local output=$(apt-get --quiet download "$package" 2>/dev/null)
 
         # confirm apt-get exited successfully
         if (( $? != 0 )); then
@@ -171,7 +174,9 @@ unpack(){
             exit 1
         fi
 
+        # unpack archive
         dpkg-deb --raw-extract "$1" "$target"
+
     # for an installed package
     elif dpkg-query --show --showformat='${Status}' "$1" 2>/dev/null | grep -Fq 'install ok installed'; then
         local pkgtype=installation
