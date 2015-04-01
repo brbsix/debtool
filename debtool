@@ -5,6 +5,7 @@
 
 # create a debian archive from a directory
 build(){
+
     if [[ -d $1 ]]; then
         prep "$1"
 
@@ -36,10 +37,12 @@ build(){
         fi
         exit 1
     fi
+
 }
 
 # download package(s) via apt-get then unpack
 combo(){
+
     for package in "$@"; do
 
         # aquire the package destination filename
@@ -75,7 +78,7 @@ combo(){
             continue
         fi
 
-        # unpack downloaded package
+        # unpack downloaded archive
         if [[ -n $output ]]; then
             unpack "$dest"
         # prompt to unpack pre-existing package
@@ -87,12 +90,15 @@ combo(){
         fi
 
     done
+
 }
 
 # download package(s) via apt-get
 download(){
+
     local successes
     local failures
+
     for package in "$@"; do
         if apt-get download "$package" &>/dev/null; then
             successes+=("$package")
@@ -161,6 +167,7 @@ prep(){
 
 # reinstall package(s)
 reinst(){
+
     for archive in "$@"; do
 
         # confirm archive is a file
