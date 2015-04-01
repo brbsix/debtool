@@ -12,7 +12,7 @@ _debtool(){
         _filedir -d
         return 0
         ;;
-    -c|--combo|-d|--download)
+    -c|--combo|-d|--download|-s|--show)
         COMPREPLY=( $( _xfunc dpkg apt-cache pkgnames "$cur" 2>/dev/null ) )
         return 0
         ;;
@@ -21,13 +21,15 @@ _debtool(){
         return 0
         ;;
     -u|--unpack)
-        COMPREPLY=( $( compgen -f -X '!*.deb' -- "$cur" ) $( _xfunc dpkg _comp_dpkg_installed_packages "$cur" 2>/dev/null) )
+        COMPREPLY=( $( compgen -f -X '!*.deb' -- "$cur" )
+                    $( _xfunc dpkg _comp_dpkg_installed_packages "$cur" 2>/dev/null) )
         return 0
         ;;
     esac
 
     if [[ $cur = -* ]]; then
-        COMPREPLY=( $( compgen -W '-b --build -c --combo -d --download -h --help -r --reinst -u --unpack' -- "$cur" ) )
+        COMPREPLY=( $( compgen -W '-a --auto -b --build -c --combo -d --download -f -h --help
+                                   -r --reinst -s --show --show-format -u --unpack' -- "$cur" ) )
     fi
 
 }
