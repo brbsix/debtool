@@ -81,12 +81,15 @@ combo(){
         # unpack downloaded archive
         if [[ -n $output ]]; then
             unpack "$dest"
-        # prompt to unpack pre-existing package
-        else
+        # prompt to unpack pre-existing archive (if auto is not enabled)
+        elif [[ $auto != enabled ]]; then
             read -p "Would you like to unpack pre-existing archive '$dest'? "
             if [[ ${REPLY,} = y ]]; then
                 unpack "$dest"
             fi
+        # skip prompt (if auto is enabled)
+        else
+            echo "Skipping unpack of pre-existing archive '$dest'"
         fi
 
     done
@@ -197,8 +200,102 @@ reinst(){
         else
             echo "dpkg: failed to install '$package' ($archive)"
         fi
+
+    done
+
+}
+
+show(){
+
+    for package in "$@"; do
+
+        if [[ $format = enabled ]]; then
+            printstr='printf "apt-get download %s=%s -a=%s\n", p, v, a'
+        else
+            printstr='print p, v, a'
+        fi
+
+        cmdstring="apt-cache show '$package' | awk '/^Package: /{p=\$2} /^Version: /{v=\$2} /^Architecture/{a=\$2} /^$/{ $printstr }'"
+
+        results=$(eval -- $cmdstring)
+
+        if (( $? != 0 )) || [[ -z $results ]]; then
+            error "apt-cache is unable to locate package '$package'"
+            continue
+        else
+            echo "$results"
+        fi
+
     done
 }
+
+# show(){
+
+#     for package in "$@"; do
+
+#         # store apt-cache package information
+#         cache=$(apt-cache show "$package" 2>/dev/null)
+
+#         if (( $? != 0 )) || [[ -z $cache ]]; then
+#             error "apt-cache is unable to locate package '$package'"
+#             continue
+#         fi
+
+#         if [[ $format = enabled ]]; then
+#             echo "$cache" | awk '/^Package: /{p=$2} /^Version: /{v=$2} /^Architecture/{a=$2} /^$/{ printf "apt-get download %s=%s -a=%s\n", p, v, a }'
+#         else
+#             echo "$cache" | awk '/^Package: /{p=$2} /^Version: /{v=$2} /^Architecture/{a=$2} /^$/{ print p, v, a }'
+#         fi
+
+#     done
+# }
+
+# show(){
+
+#     # set output formats (for with and without architecture)
+#     if [[ $format = enabled ]]; then
+#         local fields3='printf "apt-get download %s=%s -a=%s\n", p, v, a'
+#         local fields2='printf "apt-get download %s=%s -a=%s\n", p, v'
+#     else
+#         local fields3='printf "%s %s %s\n", p, v, a'
+#         local fields2='printf "%s %s\n", p, v'
+#     fi
+
+#     for package in "$@"; do
+#         (
+
+#         # create temp directory /tmp/control.XXXXX
+#         local tmpdir=$(mktemp --directory --tmpdir control.XXXXX)
+
+#         # enter temp directory prior to next command
+#         cd "$tmpdir" 2>/dev/null
+
+#         # store apt-cache package information
+#         cache=$(apt-cache show "$package" 2>/dev/null)
+
+#         if (( $? != 0 )) || [[ -z $cache ]]; then
+#             error "apt-cache is unable to locate package '$package'"
+#             continue
+#         fi
+
+#         # output apt-cache into individual control### files
+#         echo "$cache" | grep -E '^(Architecture|Package|Version): ' | split --suffix-length=3 --lines=3 --numeric-suffixes - control
+
+#         # display package information
+#         eval 'find "$tmpdir" -maxdepth 1 -type f -name "control*" -exec awk "/^Package: / { p=\$2 }; /^Version: / { v=\$2 }; /^Architecture: / { a=\$2 }; END{ if ( length(a) > 0 ) { $fields3 } else { $fields2 } }" "{}" \;'
+
+#         # remove $tmpdir and it's contents recursively (unsafe)
+#         # rm -r "$tmpdir"
+
+#         # remove control### files in $tmpdir (safely)
+#         find "$tmpdir" -type f -name 'control*' -exec rm '{}' \; 2>/dev/null
+
+#         # remove $tmpdir (as long as it is empty)
+#         rmdir "$tmpdir" 2>/dev/null
+
+#         )
+#     done
+# }
 
 # unpack a debian archive or installed package
 unpack(){
@@ -257,7 +354,7 @@ unpack(){
     echo "Successfully unpacked $pkgtype to: $target"
 
     # prompt to delete archive
-    if [[ $pkgtype = archive ]]; then
+    if [[ $pkgtype = archive && $auto != enabled ]]; then
         read -p "Remove '$1'? "
         if [[ ${REPLY,} = y ]]; then
             rm "$1"
@@ -270,40 +367,66 @@ if (( $# == 1 )) && [[ $1 =~ ^(-h|--help|help)$ ]]; then
     echo "Usage: ${0##*/} OPTION [ARCHIVE|DIRECTORY|PACKAGE] [TARGET]"
     echo "Manipulate debian archives."
     echo
+    echo "Mandatory Options"
     echo "  -b, --build           create a debian archive from DIR"
     echo "  -c, --combo           download then unpack PKG(s)"
     echo "  -d, --download        download PKGS(s) via apt-get"
     echo "  -r, --reinst          reinstall ARCHIVE(s)"
+    echo "  -s, --show            show PKG(s) available for download"
     echo "  -u, --unpack          unpack ARCHIVE or installed PKG into DIR"
+    echo
+    echo "Miscellaneous Options"
+    echo "  -a, --auto            skip any prompts for user input"
+    echo "  -f, --show-format     format output of --show"
     echo
     echo "NOTE: ARCHIVE refers to a '.deb' debian archive. PKG refers to" \
          "program available to download or an installed program to unpack."
     exit 0
 fi
 
-parameters=$(getopt -o b,c,d,r,u -l build,combo,download,reinst,unpack -n "${0##*/}" -- "$@")
+shopts='a,b,c,d,f,r,s,u'
+lopts='auto,build,combo,download,reinst,show,show-format,unpack'
+
+parameters=$(getopt -o "$shopts" -l "$lopts" -n "${0##*/}" -- $@)
+
+if (( $? != 0 )); then
+    exit 1
+fi
+
 eval set -- "$parameters"
 
 while true; do
     case "$1" in
+        -a|--auto)
+            auto='enabled'
+            shift
+            ;;
         -b|--build)
-            cmd='build'
+            cmds+=('build')
             shift
             ;;
         -c|--combo)
-            cmd='combo'
+            cmds+=('combo')
             shift
             ;;
         -d|--download)
-            cmd='download'
+            cmds+=('download')
+            shift
+            ;;
+        -f|--show-format)
+            format='enabled'
             shift
             ;;
         -r|--reinst)
-            cmd='reinst'
+            cmds+=('reinst')
+            shift
+            ;;
+        -s|--show)
+            cmds+=('show')
             shift
             ;;
         -u|--unpack)
-            cmd='unpack'
+            cmds+=('unpack')
             shift
             ;;
         --)
@@ -331,6 +454,9 @@ case "$cmd" in
         ;;
     reinst)
         reinst "$@"
+        ;;
+    show)
+        show "$@"
         ;;
     unpack)
         unpack "$@"
