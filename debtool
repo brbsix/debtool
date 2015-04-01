@@ -436,13 +436,18 @@ while true; do
     esac
 done
 
-if (( $# == 0 )); then
+if (( $# == 0 )) || (( ${#cmds[@]} == 0 )); then
     error "Missing operand"
     echo "Try 'chmod --help' for more information." >&2
     exit 1
+elif (( ${#cmds[@]} == 1 )); then
+    cmd=${cmds[0]}
+else
+    error "Too many commands"
+    exit 1
 fi
 
-case "$cmd" in
+case $cmd in
     build)
         build "$@"
         ;;
