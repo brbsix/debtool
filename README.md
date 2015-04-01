@@ -28,11 +28,17 @@ Usage
     Usage: debtool OPTION [ARCHIVE|DIRECTORY|PACKAGE] [TARGET]
     Manipulate debian archives.
 
+    Mandatory Options
       -b, --build           create a debian archive from DIR
       -c, --combo           download then unpack PKG(s)
       -d, --download        download PKGS(s) via apt-get
       -r, --reinst          reinstall ARCHIVE(s)
+      -s, --show            show PKG(s) available for download
       -u, --unpack          unpack ARCHIVE or installed PKG into DIR
+
+    Miscellaneous Options
+      -a, --auto            skip any prompts for user input
+      -f, --show-format     format output of --show
 
     NOTE: ARCHIVE refers to a '.deb' debian archive. PKG refers to program
           available to download or an installed program to unpack.
@@ -71,7 +77,15 @@ You can specify a destination filename as follows if you'd like (otherwise the s
 
 After you've made changes, you can rapidly reinstall (purge then install) the indicated archive:
 
-    debtool --reinst package.deb
+    debtool --reinst ARCHIVE
+
+To show the versions and architectures of packages available for download (i.e. `gawk 1:4.0.1+dfsg-2.1ubuntu2 amd64`):
+
+    debtool --show PACKAGE
+
+To show the versions and achitectures of packages available for download, formatted for manual installation (i.e. `apt-get download gawk=1:4.0.1+dfsg-2.1ubuntu2 -a=amd64`):
+
+    debtool --show --show-format PACKAGE
 
 License
 -------
