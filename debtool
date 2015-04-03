@@ -84,7 +84,7 @@ combo(){
         # prompt to unpack pre-existing archive (if auto is not enabled)
         elif [[ $auto != enabled ]]; then
             read -p "Would you like to unpack pre-existing archive '$dest'? "
-            if [[ ${REPLY,} = y ]]; then
+            if [[ ${REPLY,} = y* ]]; then
                 unpack "$dest"
             fi
         # skip prompt (if auto is enabled)
@@ -356,7 +356,7 @@ unpack(){
     # prompt to delete archive
     if [[ $pkgtype = archive && $auto != enabled ]]; then
         read -p "Remove '$1'? "
-        if [[ ${REPLY,} = y ]]; then
+        if [[ ${REPLY,} = y* ]]; then
             rm "$1"
         fi
     fi
