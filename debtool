@@ -40,6 +40,14 @@ build(){
 
 }
 
+# ensure destination does not already exist
+checkdest(){
+    if [[ -e $2 ]]; then
+        error "Unable to unpack '$1' (destination folder '$2' already exists)"
+        exit 1
+    fi
+}
+
 # download package(s) via apt-get then unpack
 combo(){
 
@@ -124,48 +132,75 @@ error(){
     echo "ERROR: $@" >&2
 }
 
+# determing package type (archive, installation, neither, or both)
+pkgtype(){
+    local pkgtype=()
+
+    # for a debian archive file
+    dpkg-deb --info "$1" &>/dev/null && pkgtype+=(archive)
+
+    # for an installed package
+    dpkg-query --show --showformat='${Status}' "$1" 2>/dev/null | grep -Fq 'install ok installed' && pkgtype+=(installation)
+
+    if (( ${#pkgtype[@]} == 0 )); then
+        error "'$1' is not an installed package or valid debian archive"
+        return 1
+    elif (( ${#pkgtype[@]} == 1 )); then
+        echo "${pkgtype[0]}"
+    elif (( ${#pkgtype[@]} == 2 )); then
+        warning "'$1' is both an installed package and a debian archive (assuming you are referring to the debian archive)"
+        echo archive
+    fi
+}
+
 # prepare directory prior to build
 prep(){
     (
-    # enter directory
-    cd "$1"
 
-    # compress manpages (if necessary)
-    # find -type f -regex '\./usr/share/man/.*' -name '*.[1-9]' ! -name '*.gz' -print0 | xargs -0r gzip -9fn
+        # enter directory
+        cd "$1"
 
-    # verify write access then compress manpages (if necessary)
-    while IFS= read -rd $'\0' manpage; do
-        if [[ -w $manpage ]]; then
-            chmod 0644 "$manpage"
-            gzip -9fn "$manpage"
-        else
-            error "No write access to '$manpage'"
-            return 1
+        # prepare manpages (verify write access, set perms, compress)
+        while IFS= read -rd $'\0' manpage; do
+            if [[ ! -w $manpage ]]; then
+                error "No write access to '$manpage'"
+                return 1
+            elif ! chmod 0644 "$manpage"; then
+                error "Failed to chmod '$manpage'"
+                return 1
+            elif ! gzip -9fn "$manpage" ; then
+                error "Failed to gzip '$manpage'"
+                return 1
+            fi
+        done < <(find -type f -regex '\./usr/share/man/.*' -name '*.[1-9]' ! -name '*.gz' -print0)
+
+        # update md5sums if necessary
+        if [[ -f DEBIAN/md5sums ]]; then
+
+            # verify write access
+            if [[ ! -w DEBIAN/md5sums ]]; then
+                error "No write access to 'DEBIAN/md5sums'"
+                return 1
+            elif ! prep_md5sums; then
+                error "Failed to update DEBIAN/md5sums"
+                return 1
+            elif ! md5sum --check --status DEBIAN/md5sums; then
+                error "DEBIAN/md5sums failed checksum verification"
+                return 1
+            fi
+
         fi
-    done < <(find -type f -regex '\./usr/share/man/.*' -name '*.[1-9]' ! -name '*.gz' -print0)
-
-    # update md5sums if necessary
-    if [[ -f DEBIAN/md5sums ]]; then
-
-        # verify write access
-        if [[ -w DEBIAN/md5sums ]]; then
-
-            # disregard original and generate new md5sums
-            # find -type f ! -regex '\./DEBIAN/.*' ! -regex '\./etc/.*' -printf '%P\0' | LC_ALL=C sort -z | xargs -0r md5sum > DEBIAN/md5sums
-
-            # use original md5sums as a template
-            (mv "DEBIAN/md5sums" "DEBIAN/md5sums~" && \
-            awk '{printf "%s\0", $2}' "DEBIAN/md5sums~" | xargs -0r md5sum > DEBIAN/md5sums && \
-            rm "DEBIAN/md5sums~" && \
-            chmod 644 "DEBIAN/md5sums") 2>/dev/null
-        else
-            error "No write access to 'DEBIAN/md5sum'"
-            return 1
-        fi
-
-    fi
 
     ) || exit 1
+}
+
+# remake md5sums using original as a template
+prep_md5sums(){
+    mv "DEBIAN/md5sums" "DEBIAN/md5sums~" &&
+    awk '{printf "%s\0", $2}' "DEBIAN/md5sums~" \
+    | xargs -0r md5sum > DEBIAN/md5sums &&
+    rm "DEBIAN/md5sums~" &&
+    chmod 644 "DEBIAN/md5sums"
 }
 
 # reinstall package(s)
@@ -229,50 +264,36 @@ show(){
 
 # unpack a debian archive or installed package
 unpack(){
-    # for a debian archive file
-    if dpkg-deb --info "$1" &>/dev/null; then
-        local pkgtype=archive
+
+    # determine package type (debian archive or installed) and exit if neither
+    pkgtype=$(pkgtype "$1") || exit 1
+
+    if [[ $pkgtype = archive ]]; then
         if [[ -n $2 ]]; then
             local target=$2
         else
             local target=$(dpkg-deb --field "$1" package version architecture | awk '{print $2}' | paste -sd_)
         fi
 
-        if [[ -e $target ]]; then
-            error "Unable to unpack '$1' (destination already exists)."
-            exit 1
-        fi
+        checkdest "$1" "$target"
 
         # unpack archive
         dpkg-deb --raw-extract "$1" "$target"
-
-    # for an installed package
-    elif dpkg-query --show --showformat='${Status}' "$1" 2>/dev/null | grep -Fq 'install ok installed'; then
-        local pkgtype=installation
+    elif [[ $pkgtype = installation ]]; then
         if [[ -n $2 ]]; then
             local target=$2
         else
             local target=$1
         fi
 
-        if [[ -e $target ]]; then
-            error "Unable to unpack '$1' (destination already exists)."
-            exit 1
-        fi
+        checkdest "$1" "$target"
 
         # unpack into tmpfolder
         local tmpfolder=$(fakeroot -u dpkg-repack --generate "$1" 2>/dev/null | awk '{print $(NF-2)}')
 
         # rename tmpfolder to target then clean up control file modified by dpkg-repack
-        mv "$tmpfolder" "$target" 2>/dev/null && \
-        sed -i 's/ .$//;/ (Repackaged on .* by dpkg-repack.)/d' "$target/DEBIAN/control" 2>/dev/null
-    else
-        if [[ -n $1 ]]; then
-            error "'$1' is not an installed package or valid debian archive"
-        else
-            error "You have not supplied a package to unpack"
-        fi
-        exit 1
+        mv "$tmpfolder" "$target" &>/dev/null \
+        && sed -i 's/ .$//;/ (Repackaged on .* by dpkg-repack.)/d' "$target/DEBIAN/control" &>/dev/null
     fi
 
     # check for target directory and exit now if missing
