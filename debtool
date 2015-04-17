@@ -215,9 +215,7 @@ show(){
             printstr='print p, v, a'
         fi
 
-        cmdstring="apt-cache show '$package' | awk '/^Package: /{p=\$2} /^Version: /{v=\$2} /^Architecture/{a=\$2} /^$/{ $printstr }'"
-
-        results=$(eval -- "$cmdstring")
+        results=$(apt-cache show "$package" 2>/dev/null | awk "/^Package: /{p=\$2} /^Version: /{v=\$2} /^Architecture/{a=\$2} /^$/{ $printstr }")
 
         if (( $? != 0 )) || [[ -z $results ]]; then
             error "apt-cache is unable to locate package '$package'"
