@@ -292,26 +292,103 @@ unpack(){
     fi
 }
 
+# # unpack a debian archive or installed package
+# unpack(){
+#     # for a debian archive file
+#     if dpkg-deb --info "$1" &>/dev/null; then
+#         local pkgtype=archive
+#         if [[ -n $2 ]]; then
+#             local target=$2
+#         else
+#             local target=$(dpkg-deb --field "$1" package version architecture | awk '{print $2}' | paste -sd_)
+#         fi
+
+#         if [[ -e $target ]]; then
+#             error "Unable to unpack '$1' (destination already exists)."
+#             exit 1
+#         fi
+
+#         # unpack archive
+#         dpkg-deb --raw-extract "$1" "$target"
+
+#     # for an installed package
+#     elif dpkg-query --show --showformat='${Status}' "$1" 2>/dev/null | grep -Fq 'install ok installed'; then
+#         local pkgtype=installation
+#         if [[ -n $2 ]]; then
+#             local target=$2
+#         else
+#             local target=$1
+#         fi
+
+#         if [[ -e $target ]]; then
+#             error "Unable to unpack '$1' (destination already exists)."
+#             exit 1
+#         fi
+
+#         # unpack into tmpfolder
+#         local tmpfolder=$(fakeroot -u dpkg-repack --generate "$1" 2>/dev/null | awk '{print $(NF-2)}')
+
+#         # rename tmpfolder to target then clean up control file modified by dpkg-repack
+#         mv "$tmpfolder" "$target" 2>/dev/null && \
+#         sed -i 's/ .$//;/ (Repackaged on .* by dpkg-repack.)/d' "$target/DEBIAN/control" 2>/dev/null
+#     else
+#         if [[ -n $1 ]]; then
+#             error "'$1' is not an installed package or valid debian archive"
+#         else
+#             error "You have not supplied a package to unpack"
+#         fi
+#         exit 1
+#     fi
+
+#     # check for target directory and exit now if missing
+#     if [[ ! -d $target ]]; then
+#         error "Failed to generate folder '$target' for '$1'"
+#         exit 1
+#     fi
+
+#     echo "Successfully unpacked $pkgtype to: $target"
+
+#     # prompt to delete archive
+#     if [[ $pkgtype = archive && $auto != enabled ]]; then
+#         read -p "Remove '$1'? "
+#         if [[ ${REPLY,} = y* ]]; then
+#             rm "$1"
+#         fi
+#     fi
+# }
+
+usage(){
+    cat <<-EOF
+	Usage: ${0##*/} OPTION ARCHIVE|DIRECTORY|PACKAGE TARGET
+	Manipulate debian archives.
+
+	Mandatory Options
+	  -b, --build           create a debian archive from DIR
+	  -c, --combo           download then unpack PKG(s)
+	  -d, --download        download PKGS(s) via apt-get
+	  -r, --reinst          reinstall ARCHIVE(s)
+	  -s, --show            show PKG(s) available for download
+	  -u, --unpack          unpack ARCHIVE or installed PKG into DIR
+
+	Miscellaneous Options
+	  -a, --auto            skip any prompts for user input
+	  -f, --show-format     format output of --show
+
+	NOTE: ARCHIVE refers to a '.deb' debian archive. PKG refers to \
+	program available to download or an installed program to unpack.
+	EOF
+    exit 0
+}
+
+warning(){
+    echo "WARNING: $@" >&2
+}
+
+
+script=${0##*/}
 
 if (( $# == 1 )) && [[ $1 =~ ^(-h|--help|help)$ ]]; then
-    echo "Usage: ${0##*/} OPTION [ARCHIVE|DIRECTORY|PACKAGE] [TARGET]"
-    echo "Manipulate debian archives."
-    echo
-    echo "Mandatory Options"
-    echo "  -b, --build           create a debian archive from DIR"
-    echo "  -c, --combo           download then unpack PKG(s)"
-    echo "  -d, --download        download PKGS(s) via apt-get"
-    echo "  -r, --reinst          reinstall ARCHIVE(s)"
-    echo "  -s, --show            show PKG(s) available for download"
-    echo "  -u, --unpack          unpack ARCHIVE or installed PKG into DIR"
-    echo
-    echo "Miscellaneous Options"
-    echo "  -a, --auto            skip any prompts for user input"
-    echo "  -f, --show-format     format output of --show"
-    echo
-    echo "NOTE: ARCHIVE refers to a '.deb' debian archive. PKG refers to" \
-         "program available to download or an installed program to unpack."
-    exit 0
+    usage
 fi
 
 shopts='a,b,c,d,f,r,s,u'
