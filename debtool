@@ -452,23 +452,4 @@ else
     exit 1
 fi
 
-case $cmd in
-    build)
-        build "$@"
-        ;;
-    combo)
-        combo "$@"
-        ;;
-    download)
-        download "$@"
-        ;;
-    reinst)
-        reinst "$@"
-        ;;
-    show)
-        show "$@"
-        ;;
-    unpack)
-        unpack "$@"
-        ;;
-esac
+eval "$cmd" "$@"
