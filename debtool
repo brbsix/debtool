@@ -441,9 +441,13 @@ while true; do
     esac
 done
 
-if (( $# == 0 )) || (( ${#cmds[@]} == 0 )); then
-    error "Missing operand"
-    echo "Try 'chmod --help' for more information." >&2
+if (( $# == 0 )); then
+    echo "$script: missing operand" >&2
+    echo "Try '$script' for more information." >&2
+    exit 1
+elif (( ${#cmds[@]} == 0 )); then
+    echo "$script: missing mandatory option" >&2
+    echo "Try '$script' for more information." >&2
     exit 1
 elif (( ${#cmds[@]} == 1 )); then
     cmd=${cmds[0]}
