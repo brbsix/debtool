@@ -415,11 +415,13 @@ fi
 shopts='a,b,c,d,f,r,s,u'
 lopts='auto,build,combo,download,reinst,show,show-format,unpack'
 
-eval set -- "$(getopt -o "$shopts" -l "$lopts" -n "$script" -- "$@")"
+params=$(getopt -o "$shopts" -l "$lopts" -n "$script" -- "$@")
 
 if (( $? != 0 )); then
     exit 1
 fi
+
+eval set -- "$params"
 
 while true; do
     case "$1" in
