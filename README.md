@@ -40,6 +40,9 @@ Usage
       -a, --auto            skip any prompts for user input
       -f, --show-format     format output of --show
 
+    Some mandatory options may be compined. This includes --download
+    and --unpack (equivalent --combo) as well as --build and --reinst.
+
     NOTE: ARCHIVE refers to a '.deb' debian archive. PKG refers to program
           available to download or an installed program to unpack.
 
@@ -69,11 +72,11 @@ There is also a combo command to download and unpack at the same time:
 
 After you've made changes to the contents, you may rebuild the package. As part of the (re)build process, md5sums will be updated (if necessary) and any uncompressed manpages will be gzip'd. If you need to do much more than that, you should probably be using debhelper anyways.
 
-    debtool --build PACKAGEDIR
+    debtool --build DIRECTORY
 
 You can specify a destination filename as follows if you'd like (otherwise the script will generate a suitable one):
 
-    debtool --build PACKAGEDIR package.deb
+    debtool --build DIRECTORY package.deb
 
 After you've made changes, you can rapidly reinstall (purge then install) the indicated archive:
 
@@ -86,6 +89,12 @@ To show the versions and architectures of packages available for download (i.e. 
 To show the versions and achitectures of packages available for download, formatted for manual installation (i.e. `apt-get download gawk=1:4.0.1+dfsg-2.1ubuntu2 -a=amd64`):
 
     debtool --show --show-format PACKAGE
+
+Some mandatory options may be compined. This includes --download and --unpack (equivalent --combo) as well as --build and --reinst.
+
+    debtool -du git mawk unar
+
+    debtool -br DIRECTORY
 
 License
 -------
