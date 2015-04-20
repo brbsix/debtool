@@ -22,13 +22,15 @@ _debtool(){
         return 0
         ;;
     -r|--reinst)
-        COMPREPLY=( $( compgen -f -X '!*.deb' -- "$cur" )
-                    $( compgen -d -- "$cur" ) )
+        #FIXME: figure out a way to do path completion
+        #       (definitely not compgen -d -- "$cur")
+        COMPREPLY=( $( compgen -f -X '!*.deb' -- "$cur" ) )
         return 0
         ;;
     -u|--unpack)
+        #FIXME: figure out a way to do path completion
+        #       (definitely not compgen -d -- "$cur")
         COMPREPLY=( $( compgen -f -X '!*.deb' -- "$cur" )
-                    $( compgen -d -- "$cur" )
                     $( _xfunc dpkg _comp_dpkg_installed_packages "$cur" 2>/dev/null) )
         return 0
         ;;
