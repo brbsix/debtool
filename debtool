@@ -27,8 +27,19 @@ build(){
 
         fi
 
+        check_build_destination "$1" "$archive"
+
         # build the archive
-        fakeroot dpkg-deb --build "${1%/}" "$archive"
+        # fakeroot dpkg-deb --build "${1%/}" "$archive"
+        fakeroot dpkg-deb --build "$1" "$archive"
+
+        if [[ ! -f $archive ]]; then
+            exit 1
+        fi
+
+        if [[ $reinstall = 'true' ]]; then
+            reinst "$archive"
+        fi
     else
         if [[ -n $1 ]]; then
             error "'$1' is not a directory"
@@ -40,8 +51,25 @@ build(){
 
 }
 
-# ensure destination does not already exist
-checkdest(){
+# ensure build destination does not already exist
+check_build_destination(){
+    if [[ -e $2 ]]; then
+        if [[ $auto = enabled ]]; then
+            error "Unable to build '$1' (destination '$2' already exists)"
+            read -p "Would you like to overwrite pre-existing file '$2'? "
+            if [[ ${REPLY,} = y* ]]; then
+                return 0
+            else
+                exit 1
+            fi
+        else
+            warning "Overwriting pre-existing file '$2'"
+        fi
+    fi
+}
+
+# ensure unpack destination does not already exist
+check_unpack_destination(){
     if [[ -e $2 ]]; then
         error "Unable to unpack '$1' (destination folder '$2' already exists)"
         exit 1
@@ -275,7 +303,7 @@ unpack(){
             local target=$(dpkg-deb --field "$1" package version architecture | awk '{print $2}' | paste -sd_)
         fi
 
-        checkdest "$1" "$target"
+        check_unpack_destination "$1" "$target"
 
         # unpack archive
         dpkg-deb --raw-extract "$1" "$target"
@@ -286,7 +314,7 @@ unpack(){
             local target=$1
         fi
 
-        checkdest "$1" "$target"
+        check_unpack_destination "$1" "$target"
 
         # unpack into tmpfolder
         local tmpfolder=$(fakeroot -u dpkg-repack --generate "$1" 2>/dev/null | awk '{print $(NF-2)}')
@@ -395,6 +423,9 @@ usage(){
 	  -a, --auto            skip any prompts for user input
 	  -f, --show-format     format output of --show
 
+	Some mandatory options may be compined. This includes --download \
+	and --unpack (equivalent --combo) as well as --build and --reinst.
+
 	NOTE: ARCHIVE refers to a '.deb' debian archive. PKG refers to \
 	program available to download or an installed program to unpack.
 	EOF
@@ -474,6 +505,11 @@ elif (( ${#cmds[@]} == 0 )); then
     exit 1
 elif (( ${#cmds[@]} == 1 )); then
     cmd=${cmds[0]}
+elif (( ${#cmds[@]} == 2 )) && [[ ${cmds[@]} = *download* && ${cmds[@]} = *unpack* ]]; then
+    cmd='combo'
+elif (( ${#cmds[@]} == 2 )) && [[ ${cmds[@]} = *build* && ${cmds[@]} = *reinst* ]]; then
+    cmd='build'
+    reinstall='true'
 else
     error "Too many commands"
     exit 1
