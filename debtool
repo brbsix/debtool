@@ -56,7 +56,7 @@ check_build_destination(){
     if [[ -e $2 ]]; then
         if [[ $auto != enabled ]]; then
             error "Unable to build '$1' (destination '$2' already exists)"
-            read -p "Would you like to overwrite pre-existing file '$2'? "
+            read -p "Overwrite pre-existing file '$2'? "
             if [[ ${REPLY,} = y* ]]; then
                 return 0
             else
