@@ -3,6 +3,11 @@
 # Simple tool to facilitate downloading and repacking debian archives
 
 
+# enable auto option
+auto(){
+    auto='enabled'
+}
+
 # create a debian archive from a directory
 build(){
 
@@ -214,6 +219,11 @@ error(){
     echo "${script}:ERROR: $@" >&2
 }
 
+# enable format option
+format(){
+    format='enabled'
+}
+
 info(){
     echo "${script}:INFO: $@"
 }
@@ -287,6 +297,11 @@ prep_md5sums(){
     | xargs -0r md5sum > DEBIAN/md5sums &&
     rm "DEBIAN/md5sums~" &&
     chmod 644 "DEBIAN/md5sums"
+}
+
+# enable quiet option
+quiet(){
+    quiet='>/dev/null'
 }
 
 # reinstall package(s)
@@ -517,17 +532,21 @@ usage(){
 
 	Mandatory Options
 	  -b, --build           create a debian archive from DIR
-	  -c, --combo           download then unpack PKG(s)
 	  -d, --download        download PKGS(s) via apt-get
 	  -r, --reinst          reinstall ARCHIVE(s)
 	  -s, --show            show PKG(s) available for download
 	  -u, --unpack          unpack ARCHIVE or installed PKG into DIR
 
+	Combination Options
+	  -c, --combo           download then unpack PKG(s) [-du]
+	  -z, --fast            build fast [-abr]
+
 	Miscellaneous Options
 	  -a, --auto            skip any prompts for user input
 	  -f, --show-format     format output of --show
+	  -q, --quiet           suppress normal messages
 
-	Some mandatory options may be compined. This includes --download and --unpack (equivalent --combo) as well as --build and --reinst.
+	Some mandatory options may be combined. Combination options include '--auto --download --unpack' (equivalent --combo), '--auto --build --reinst --quiet' (equivalent to --fast), and '--build --reinst'.
 
 	NOTE: ARCHIVE refers to a '.deb' debian archive. PKG refers to program available to download or an installed program to unpack.
 	EOF
@@ -545,8 +564,8 @@ if (( $# == 1 )) && [[ $1 =~ ^(-h|--help|help)$ ]]; then
     usage
 fi
 
-shopts='a,b,c,d,f,r,s,u'
-lopts='auto,build,combo,download,reinst,show,show-format,unpack'
+shopts='a,b,c,d,f,q,r,s,u,z'
+lopts='auto,build,combo,download,fast,quiet,reinst,show,show-format,unpack'
 
 params=$(getopt -o "$shopts" -l "$lopts" -n "$script" -- "$@")
 
@@ -559,7 +578,7 @@ eval set -- "$params"
 while true; do
     case "$1" in
         -a|--auto)
-            auto='enabled'
+            auto
             shift
             ;;
         -b|--build)
@@ -567,6 +586,7 @@ while true; do
             shift
             ;;
         -c|--combo)
+            auto
             cmds+=('combo')
             shift
             ;;
@@ -575,7 +595,11 @@ while true; do
             shift
             ;;
         -f|--show-format)
-            format='enabled'
+            format
+            shift
+            ;;
+        -q|--quiet)
+            quiet
             shift
             ;;
         -r|--reinst)
@@ -588,6 +612,13 @@ while true; do
             ;;
         -u|--unpack)
             cmds+=('unpack')
+            shift
+            ;;
+        -z|--fast)
+            auto
+            quiet
+            cmds+=('build')
+            cmds+=('reinst')
             shift
             ;;
         --)
@@ -617,4 +648,4 @@ else
     exit 1
 fi
 
-eval "$cmd" "$@"
+eval -- "$cmd" "$@" "$quiet"

@@ -39,9 +39,11 @@ Usage
     Miscellaneous Options
       -a, --auto            skip any prompts for user input
       -f, --show-format     format output of --show
+      -q, --quiet           suppress normal messages
 
-    Some mandatory options may be compined. This includes --download
-    and --unpack (equivalent --combo) as well as --build and --reinst.
+    Some mandatory options may be combined. Valid combinations include '--auto
+    --download --unpack' (equivalent --combo), '--auto --build --reinst --quiet'
+    (equivalent to --fast), and '--build --reinst'.
 
     NOTE: ARCHIVE refers to a '.deb' debian archive. PKG refers to program
           available to download or an installed program to unpack.
@@ -90,7 +92,7 @@ To show the versions and achitectures of packages available for download, format
 
     debtool --show --show-format PACKAGE
 
-Some mandatory options may be compined. This includes --download and --unpack (equivalent --combo) as well as --build and --reinst.
+Some mandatory options may be combined. Valid combinations include '--auto --download --unpack' (equivalent --combo), '--auto --build --reinst --quiet' (equivalent to --fast), and '--build --reinst'.
 
     debtool -du git mawk unar
 

@@ -13,7 +13,7 @@ _debtool(){
     prev=${COMP_WORDS[COMP_CWORD-1]}
 
     case $prev in
-    -b|-br|--build|-rb)
+    -b|-br|--build|--fast|-rb|-z)
         _filedir -d
         return 0
         ;;
@@ -37,8 +37,9 @@ _debtool(){
     esac
 
     if [[ $cur = -* ]]; then
-        COMPREPLY=( $( compgen -W '-a --auto -b --build -c --combo -d --download -f -h --help
-                                   -r --reinst -s --show --show-format -u --unpack' -- "$cur" ) )
+        COMPREPLY=( $( compgen -W '-a --auto -b --build -c --combo -d --download
+                                   -f --fast -h --help -q --quiet -r --reinst -s
+                                   --show --show-format -u --unpack -z' -- "$cur" ) )
     fi
 
 }
