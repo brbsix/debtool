@@ -164,7 +164,7 @@ create_backup(){
     mv "$2" "$tempdir"
     if [[ -f "$tempdir/${2##*/}" ]]; then
         backup="$tempdir/${2##*/}"
-        info "Created backup of '$2' at '$backup'"
+        info "Storing backup of '$2' at '$backup'"
     else
         info "Failed to backup '$2'"
     fi
