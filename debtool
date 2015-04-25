@@ -607,9 +607,9 @@ elif (( ${#cmds[@]} == 0 )); then
     exit 1
 elif (( ${#cmds[@]} == 1 )); then
     cmd=${cmds[0]}
-elif (( ${#cmds[@]} == 2 )) && [[ ${cmds[@]} = *download* && ${cmds[@]} = *unpack* ]]; then
+elif (( ${#cmds[@]} == 2 )) && [[ "${cmds[@]}" = *download* && "${cmds[@]}" = *unpack* ]]; then
     cmd='combo'
-elif (( ${#cmds[@]} == 2 )) && [[ ${cmds[@]} = *build* && ${cmds[@]} = *reinst* ]]; then
+elif (( ${#cmds[@]} == 2 )) && [[ "${cmds[@]}" = *build* && "${cmds[@]}" = *reinst* ]]; then
     cmd='build'
     reinstall='true'
 else
