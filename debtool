@@ -10,7 +10,7 @@ build(){
         prep "$1"
 
         if [[ -n $2 ]]; then
-            local archive=$2
+            archive=$2
         else
 
             # identify archive control file
@@ -23,7 +23,7 @@ build(){
             fi
 
             # determine archive name from contents of control file
-            local archive=$(awk '/^Package: / { p=$2 }; /^Version: / { v=$2 }; /^Architecture: / { a=$2 }; END{ if ( length(a) > 0 ) { printf "%s_%s_%s.deb", p, v, a } else { printf "%s_%s.deb", p, v } }' "$control")
+            archive=$(awk '/^Package: / { p=$2 }; /^Version: / { v=$2 }; /^Architecture: / { a=$2 }; END{ if ( length(a) > 0 ) { printf "%s_%s_%s.deb", p, v, a } else { printf "%s_%s.deb", p, v } }' "$control")
 
         fi
 
@@ -33,7 +33,18 @@ build(){
         # fakeroot dpkg-deb --build "${1%/}" "$archive"
         fakeroot dpkg-deb --build "$1" "$archive"
 
-        if [[ ! -f $archive ]]; then
+        # check if build failed
+        if (( $? != 0 )); then
+            error "dpkg-deb exited with a nonzero exit code"
+            restore_backup
+            exit 1
+        fi
+
+        # check if archive was created and handle backup
+        if [[ -f $archive ]]; then
+            remove_backup
+        else
+            restore_backup
             exit 1
         fi
 
@@ -53,18 +64,24 @@ build(){
 
 # ensure build destination does not already exist
 check_build_destination(){
-    if [[ -e $2 ]]; then
+    if [[ -e $2 && -f $2 ]]; then
         if [[ $auto != enabled ]]; then
-            error "Unable to build '$1' (destination '$2' already exists)"
+
+            # prompt to overwrite pre-existing file
             read -p "Overwrite pre-existing file '$2'? "
-            if [[ ${REPLY,} = y* ]]; then
-                return 0
-            else
+            if [[ ${REPLY,} != y* ]]; then
                 exit 1
             fi
+
         else
             warning "Overwriting pre-existing file '$2'"
         fi
+
+        create_backup "$@"
+
+    elif [[ -e $2 ]]; then
+        error "Unable to build '$1' (destination '$2' already exists but is not a file)"
+        exit 1
     fi
 }
 
@@ -132,6 +149,43 @@ combo(){
 
 }
 
+# backup a pre-existing archive (into a temp dir)
+create_backup(){
+
+    # create a temporary directory
+    tempdir=$(mktemp --directory 2>/dev/null)
+    if [[ ! -d $tempdir ]]; then
+        error "Experienced unknown error while creating temporary directory"
+        echo "Please remove the pre-existing file and try again"
+        exit 1
+    fi
+
+    # backup pre-existing file
+    mv "$2" "$tempdir"
+    if [[ -f "$tempdir/${2##*/}" ]]; then
+        backup="$tempdir/${2##*/}"
+        info "Created backup of '$2' at '$backup'"
+    else
+        info "Failed to backup '$2'"
+    fi
+
+}
+
+# # backup a pre-existing archive (into the same dir)
+# create_backup(){
+#     if [[ ! -e "${2}~" ]]; then
+#         mv "$2" "${2}~"
+#         if [[ -f "${2}~" ]]; then
+#             info "Created backup of '$2'"
+#             backup='true'
+#         else
+#             info "Failed to backup '$2'"
+#             error "Please remove '$2' before retrying"
+#             exit 1
+#         fi
+#     fi
+# }
+
 # download package(s) via apt-get
 download(){
 
@@ -157,7 +211,11 @@ download(){
 }
 
 error(){
-    echo "ERROR: $@" >&2
+    echo "${script}:ERROR: $@" >&2
+}
+
+info(){
+    echo "${script}:INFO: $@"
 }
 
 # determing package type (archive, installation, neither, or both)
@@ -268,6 +326,52 @@ reinst(){
 
 }
 
+# remove an archive backup (from a temp dir)
+remove_backup(){
+    if [[ -n $backup ]]; then
+        rm "$backup"
+        rmdir "$tempdir"
+    fi
+}
+
+# # remove an archive backup (from the same dir)
+# remove_backup(){
+#     if [[ -f "${archive}~" && $backup = 'true' ]]; then
+#         rm "${archive}~"
+#         if [[ -f "${archive}~" ]]; then
+#             info "Failed to remove backup file '${archive}~'"
+#         else
+#             info "Removed backup file '${archive}~'"
+#         fi
+#     fi
+# }
+
+# restore an archive backup (from a temp dir)
+restore_backup(){
+    if [[ -n $backup ]]; then
+        mv -T "$backup" "$archive"
+        if [[ -f $archive ]]; then
+            info "Restored '$archive' from backup"
+        else
+            info "Failed to restore '$archive' from backup"
+        fi
+        rmdir "$tempdir"
+    fi
+}
+
+# restore an archived backup (from the same dir)
+# restore_backup(){
+#     if [[ -f "${archive}~" && $backup = 'true' ]]; then
+#         mv "${archive}~" "$archive"
+#         if [[ -f $archive ]]; then
+#             info "Restored '$archive' from backup"
+#         else
+#             info "Failed to restore '$archive' from backup"
+#         fi
+#     fi
+# }
+
+# show packages available for download
 show(){
 
     for package in "$@"; do
@@ -431,7 +535,7 @@ usage(){
 }
 
 warning(){
-    echo "WARNING: $@" >&2
+    echo "${script}:WARNING: $@" >&2
 }
 
 
