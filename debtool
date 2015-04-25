@@ -423,11 +423,9 @@ usage(){
 	  -a, --auto            skip any prompts for user input
 	  -f, --show-format     format output of --show
 
-	Some mandatory options may be compined. This includes --download \
-	and --unpack (equivalent --combo) as well as --build and --reinst.
+	Some mandatory options may be compined. This includes --download and --unpack (equivalent --combo) as well as --build and --reinst.
 
-	NOTE: ARCHIVE refers to a '.deb' debian archive. PKG refers to \
-	program available to download or an installed program to unpack.
+	NOTE: ARCHIVE refers to a '.deb' debian archive. PKG refers to program available to download or an installed program to unpack.
 	EOF
     exit 0
 }
