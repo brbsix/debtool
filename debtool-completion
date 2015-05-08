@@ -5,6 +5,17 @@
 
 _have debtool && {
 
+_lsdebs(){
+    local a=( $( compgen -f -X '.@(deb|DEB)' -X '?(*/).*' -- "$cur" ) )
+    local b=( $( compgen -f -- "$cur" ) )
+
+    if (( ${#a[@]} == ${#b[@]} )); then
+        compgen -d -- "$cur"
+    elif (( ${#a[@]} > 0 )); then
+        printf '%s\n' "${a[@]}"
+    fi
+}
+
 _debtool(){
     local cur prev
 
@@ -22,15 +33,22 @@ _debtool(){
         return 0
         ;;
     -r|--reinst)
-        #FIXME: figure out a way to do path completion
-        #       (definitely not compgen -d -- "$cur")
-        COMPREPLY=( $( compgen -f -X '!*.deb' -- "$cur" ) )
+        # NOTE: This will only show .deb files (no dirs) and breaks the
+        #       ability to transverse directories with completion
+        # COMPREPLY=( $( compgen -f -X '!*.deb' -- "$cur" ) )
+
+        compopt -o filenames &>/dev/null
+        COMPREPLY+=( $(_lsdebs) )
+
         return 0
         ;;
     -u|--unpack)
-        #FIXME: figure out a way to do path completion
-        #       (definitely not compgen -d -- "$cur")
-        COMPREPLY=( $( compgen -f -X '!*.deb' -- "$cur" )
+        # NOTE: The compgen function only show .deb files (no dirs) and breaks
+        #       the ability to transverse directories with completion
+        # COMPREPLY=( $( compgen -f -X '!*.deb' -- "$cur" )
+        #             $( _xfunc dpkg _comp_dpkg_installed_packages "$cur" 2>/dev/null) )
+        compopt -o filenames &>/dev/null
+        COMPREPLY=( $( _lsdebs )
                     $( _xfunc dpkg _comp_dpkg_installed_packages "$cur" 2>/dev/null) )
         return 0
         ;;
