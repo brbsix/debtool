@@ -73,7 +73,7 @@ check_build_destination(){
         if [[ $auto != enabled ]]; then
 
             # prompt to overwrite pre-existing file
-            read -p "Overwrite pre-existing file '$2'? "
+            read -p "Overwrite pre-existing file '$2' (y|N)? "
             if [[ ${REPLY,} != y* ]]; then
                 exit 1
             fi
