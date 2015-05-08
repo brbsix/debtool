@@ -630,7 +630,7 @@ done
 
 if (( $# == 0 )); then
     echo "$script: missing operand" >&2
-    echo "Try '$script' for more information." >&2
+    echo "Try '$script --help' for more information." >&2
     exit 1
 elif (( ${#cmds[@]} == 0 )); then
     echo "$script: missing mandatory option" >&2
