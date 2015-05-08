@@ -10,26 +10,37 @@ auto(){
 
 # create a debian archive from a directory
 build(){
+    (
+        # local archive backupdir backupfile
 
-    if [[ -d $1 ]]; then
-        prep "$1"
+        if [[ ! -d $1 ]]; then
+            error "'$1' is not a directory"
+            exit 1
+        fi
+
+        prep_build "$1"
 
         if [[ -n $2 ]]; then
             archive=$2
         else
 
-            # identify archive control file
+            # identify control file
             control=$1/DEBIAN/control
 
-            # confirm existence of archive control
+            # verify control file (regular file, readable, nonzero size)
             if [[ ! -f $control || ! -r $control || ! -s $control ]]; then
-                error "'$1' is missing control file"
+                error "Missing or invalid control file '$control'"
                 exit 1
             fi
 
             # determine archive name from contents of control file
-            archive=$(awk '/^Package: / { p=$2 }; /^Version: / { v=$2 }; /^Architecture: / { a=$2 }; END{ if ( length(a) > 0 ) { printf "%s_%s_%s.deb", p, v, a } else { printf "%s_%s.deb", p, v } }' "$control")
+            archive=$(awk '/^Package: / { p=$2 }; /^Version: / { v=$2 }; /^Architecture: / { a=$2 }; END{ if ( length(p) == 0 || length(v) == 0 ) exit; if ( length(a) > 0 ) { printf "%s_%s_%s.deb", p, v, a } else { printf "%s_%s.deb", p, v } }' "$control" 2>/dev/null)
 
+            # verify control file was parsed
+            if [[ -z $archive ]]; then
+                error "Unparsable control file '$control'"
+                exit 1
+            fi
         fi
 
         check_build_destination "$1" "$archive"
@@ -56,16 +67,67 @@ build(){
         if [[ $reinstall = 'true' ]]; then
             reinst "$archive"
         fi
-    else
-        if [[ -n $1 ]]; then
-            error "'$1' is not a directory"
-        else
-            error "You have not supplied a directory"
-        fi
-        exit 1
-    fi
-
+    )
 }
+
+# # create a debian archive from a directory
+# build(){
+
+#     if [[ -d $1 ]]; then
+#         prep_build "$1"
+
+#         if [[ -n $2 ]]; then
+#             archive=$2
+#         else
+
+#             # identify archive control file
+#             control=$1/DEBIAN/control
+
+#             # confirm existence of archive control
+#             if [[ ! -f $control || ! -r $control || ! -s $control ]]; then
+#                 error "'$1' is missing control file"
+#                 exit 1
+#             fi
+
+#             # determine archive name from contents of control file
+#             archive=$(awk '/^Package: / { p=$2 }; /^Version: / { v=$2 }; /^Architecture: / { a=$2 }; END{ if ( length(a) > 0 ) { printf "%s_%s_%s.deb", p, v, a } else { printf "%s_%s.deb", p, v } }' "$control")
+
+#         fi
+
+#         check_build_destination "$1" "$archive"
+
+#         # build the archive
+#         # fakeroot dpkg-deb --build "${1%/}" "$archive"
+#         fakeroot dpkg-deb --build "$1" "$archive"
+
+#         # check if build failed
+#         if (( $? != 0 )); then
+#             error "dpkg-deb exited with a nonzero exit code"
+#             restore_backup
+#             exit 1
+#         fi
+
+#         # check if archive was created and handle backup
+#         if [[ -f $archive ]]; then
+#             remove_backup
+#         else
+#             restore_backup
+#             exit 1
+#         fi
+
+#         if [[ $reinstall = 'true' ]]; then
+#             reinst "$archive"
+#         fi
+#     else
+#         if [[ -n $1 ]]; then
+#             error "'$1' is not a directory"
+#         else
+#             error "You have not supplied a directory"
+#         fi
+#         exit 1
+#     fi
+
+# }
 
 # ensure build destination does not already exist
 check_build_destination(){
@@ -284,9 +346,8 @@ pkgtype(){
 }
 
 # prepare directory prior to build
-prep(){
+prep_build(){
     (
-
         # enter directory
         cd "$1"
 
@@ -320,7 +381,6 @@ prep(){
             fi
 
         fi
-
     ) || exit 1
 }
 
