@@ -225,7 +225,7 @@ format(){
 }
 
 info(){
-    echo "${script}:INFO: $@"
+    echo "$PROGRAM:INFO: $@"
 }
 
 # determing package type (archive, installation, neither, or both)
@@ -527,7 +527,7 @@ unpack(){
 
 usage(){
     cat <<-EOF
-	Usage: ${0##*/} OPTION ARCHIVE|DIRECTORY|PACKAGE TARGET
+	Usage: $PROGRAM OPTION ARCHIVE|DIRECTORY|PACKAGE TARGET
 	Manipulate debian archives.
 
 	Mandatory Options
@@ -554,11 +554,11 @@ usage(){
 }
 
 warning(){
-    echo "${script}:WARNING: $@" >&2
+    echo "$PROGRAM:WARNING: $@" >&2
 }
 
 
-script=${0##*/}
+PROGRAM=${0##*/}
 
 if (( $# == 1 )) && [[ $1 =~ ^(-h|--help|help)$ ]]; then
     usage
@@ -567,11 +567,7 @@ fi
 shopts='a,b,c,d,f,q,r,s,u,z'
 lopts='auto,build,combo,download,fast,quiet,reinst,show,show-format,unpack'
 
-params=$(getopt -o "$shopts" -l "$lopts" -n "$script" -- "$@")
-
-if (( $? != 0 )); then
-    exit 1
-fi
+params=$(getopt -o "$shopts" -l "$lopts" -n "$PROGRAM" -- "$@") || exit 1
 
 eval set -- "$params"
 
@@ -628,13 +624,13 @@ while true; do
     esac
 done
 
-if (( $# == 0 )); then
-    echo "$script: missing operand" >&2
-    echo "Try '$script --help' for more information." >&2
+if (( ${#cmds[@]} == 0 )); then
+    echo "$PROGRAM: missing mandatory option" >&2
+    echo "Try '$PROGRAM --help' for more information." >&2
     exit 1
-elif (( ${#cmds[@]} == 0 )); then
-    echo "$script: missing mandatory option" >&2
-    echo "Try '$script' for more information." >&2
+elif (( $# == 0 )); then
+    echo "$PROGRAM: missing operand" >&2
+    echo "Try '$PROGRAM --help' for more information." >&2
     exit 1
 elif (( ${#cmds[@]} == 1 )); then
     cmd=${cmds[0]}
