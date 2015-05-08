@@ -446,7 +446,7 @@ unpack(){
     # check for target directory and exit now if missing
     if [[ ! -d $target ]]; then
         error "Failed to generate folder '$target' for '$1'"
-        exit 1
+        return 1
     fi
 
     echo "Successfully unpacked $pkgtype to: $target"
