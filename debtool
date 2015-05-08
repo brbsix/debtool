@@ -90,6 +90,39 @@ check_build_destination(){
     fi
 }
 
+# check dependencies for prescribed command
+check_dependency(){
+    (
+        # store dependencies for each function
+        declare -A d
+        d['build']='awk dpkg fakeroot find gzip xargs'
+        d['combo']='apt awk dpkg'
+        d['download']='awk apt'
+        d['reinst']='dpkg'
+        d['show']='awk apt'
+        d['unpack']='awk dpkg'
+        d['unpack_installation']='dpkg-repack fakeroot sed'
+
+        # get the dependencies for function $1
+        depends=${d["$1"]}
+
+        missing=()
+        for program in $depends; do
+            hash "$program" &>/dev/null || missing+=("$program")
+        done
+
+        if (( ${#missing[@]} > 0 )); then
+            echo "Please install the following program(s) before continuing: ${missing[@]}"
+            return 1
+        fi
+    ) || exit 1
+}
+
+# check for Internet connectivity
+check_internet(){
+    ping -c1 -W1 4.2.2.2 &>/dev/null || ping -c1 -W1 8.8.8.8 &>/dev/null
+}
+
 # ensure unpack destination does not already exist
 check_unpack_destination(){
     if [[ -e $2 ]]; then
@@ -210,8 +243,9 @@ download(){
     fi
 
     if (( ${#failures[@]} > 0 )); then
-        echo "Failed to download: ${failures[@]}"
-        exit 1
+        error "Failed to download: ${failures[@]}"
+        check_internet || warning "No Internet connectivity"
+        return 1
     fi
 }
 
@@ -643,5 +677,7 @@ else
     error "Too many commands"
     exit 1
 fi
+
+check_dependency "$cmd"
 
 eval -- "$cmd" "$@" "$quiet"
