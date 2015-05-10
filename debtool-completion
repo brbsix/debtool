@@ -3,17 +3,15 @@
 # bash completion file for debtool
 
 
+# ensure debtool is on the PATH
 _have debtool && {
 
 _lsdebs(){
-    local a=( $( compgen -f -X '.@(deb|DEB)' -X '?(*/).*' -- "$cur" ) )
-    local b=( $( compgen -f -- "$cur" ) )
+    # include directories (except hidden ones)
+    compgen -d -X '?(*/).*' -- "$cur"
 
-    if (( ${#a[@]} == ${#b[@]} )); then
-        compgen -d -- "$cur"
-    elif (( ${#a[@]} > 0 )); then
-        printf '%s\n' "${a[@]}"
-    fi
+    # include files ending with .deb or .DEB
+    compgen -f -X '!*.@(deb|DEB)' -- "$cur"
 }
 
 _debtool(){
@@ -24,37 +22,52 @@ _debtool(){
     prev=${COMP_WORDS[COMP_CWORD-1]}
 
     case $prev in
-    -b|-br|--build|--fast|-rb|-z)
-        _filedir -d
-        return 0
-        ;;
-    -c|--combo|-d|--download|-s|--show)
-        COMPREPLY=( $( _xfunc dpkg apt-cache pkgnames "$cur" 2>/dev/null ) )
-        return 0
-        ;;
-    -r|--reinst)
-        # NOTE: This will only show .deb files (no dirs) and breaks the
-        #       ability to transverse directories with completion
-        # COMPREPLY=( $( compgen -f -X '!*.deb' -- "$cur" ) )
+        -b|-br|--build|--fast|-rb|-z)
 
-        compopt -o filenames &>/dev/null
-        COMPREPLY+=( $(_lsdebs) )
+            # configure pathname completion
+            compopt -o filenames &>/dev/null
 
-        return 0
-        ;;
-    -u|--unpack)
-        # NOTE: The compgen function only show .deb files (no dirs) and breaks
-        #       the ability to transverse directories with completion
-        # COMPREPLY=( $( compgen -f -X '!*.deb' -- "$cur" )
-        #             $( _xfunc dpkg _comp_dpkg_installed_packages "$cur" 2>/dev/null) )
-        compopt -o filenames &>/dev/null
-        COMPREPLY=( $( _lsdebs )
-                    $( _xfunc dpkg _comp_dpkg_installed_packages "$cur" 2>/dev/null) )
-        return 0
-        ;;
+            # include directories (except hidden ones)
+            COMPREPLY=( $( compgen -d -X '?(*/).*' -- "$cur" ) )
+
+            return 0
+            ;;
+
+        -c|--combo|-d|--download|-s|--show)
+
+            # include packages in apt-cache
+            COMPREPLY=( $( _xfunc dpkg apt-cache pkgnames "$cur" 2>/dev/null ) )
+
+            return 0
+            ;;
+
+        -r|--reinst)
+
+            # configure pathname completion
+            compopt -o filenames &>/dev/null
+
+            # include directories and debian archives
+            COMPREPLY=( $( _lsdebs ) )
+
+            return 0
+            ;;
+
+        -u|--unpack)
+
+            # configure pathname completion
+            compopt -o filenames &>/dev/null
+
+            # include directories, debian archives, and installed packages
+            COMPREPLY=( $( _lsdebs )
+                        $( _xfunc dpkg _comp_dpkg_installed_packages "$cur" 2>/dev/null ) )
+
+            return 0
+            ;;
     esac
 
     if [[ $cur = -* ]]; then
+
+        # add completion for all of debtool's command line options
         COMPREPLY=( $( compgen -W '-a --auto -b --build -c --combo -d --download
                                    -f --fast -h --help -q --quiet -r --reinst -s
                                    --show --show-format -u --unpack -z' -- "$cur" ) )
