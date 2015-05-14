@@ -392,19 +392,25 @@ create_backup(){
 # download package(s) via apt-get
 download(){
 
-    local successes
-    local failures
+    local failures successes
 
     for package in "$@"; do
-        if apt-get download "$package" &>/dev/null; then
-            successes+=("$package")
-        else
-            failures+=("$package")
-        fi
+
+        # download best package version available
+        while IFS= read -r string; do
+            if apt-get download "$string" &>/dev/null; then
+                successes+=("$package")
+                continue 2
+            fi
+        done < <("$PROGRAM" -fs "$package" 2>/dev/null | awk '{print $NF}')
+
+        # this point is only reachable upon failure
+        failures+=("$package")
+
     done
 
     if (( ${#successes[@]} > 0 )); then
-        echo "Successfully downloaded: ${successes[@]}"
+        info "Successfully downloaded: ${successes[@]}"
     fi
 
     if (( ${#failures[@]} > 0 )); then
