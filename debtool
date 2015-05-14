@@ -389,21 +389,6 @@ create_backup(){
 
 }
 
-# # backup a pre-existing archive (into the same dir)
-# create_backup(){
-#     if [[ ! -e "${2}~" ]]; then
-#         mv "$2" "${2}~"
-#         if [[ -f "${2}~" ]]; then
-#             info "Created backup of '$2'"
-#             backup='true'
-#         else
-#             info "Failed to backup '$2'"
-#             error "Please remove '$2' before retrying"
-#             exit 1
-#         fi
-#     fi
-# }
-
 # download package(s) via apt-get
 download(){
 
