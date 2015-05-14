@@ -826,7 +826,6 @@ while true; do
             shift
             ;;
         -c|--combo)
-            auto
             cmds+=('combo')
             shift
             ;;
