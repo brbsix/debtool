@@ -33,7 +33,7 @@ _debtool(){
             return 0
             ;;
 
-        -c|--combo|-d|--download|-s|--show)
+        -c|--combo|-d|--download|-i|--interactive|-s|--show)
 
             # include packages in apt-cache
             COMPREPLY=( $( _xfunc dpkg apt-cache pkgnames "$cur" 2>/dev/null ) )
@@ -69,8 +69,9 @@ _debtool(){
 
         # add completion for all of debtool's command line options
         COMPREPLY=( $( compgen -W '-a --auto -b --build -c --combo -d --download
-                                   -f --fast -h --help -q --quiet -r --reinst -s
-                                   --show --show-format -u --unpack -z' -- "$cur" ) )
+                                   -f --fast --format -h --help -i --interactive
+                                   -m --md5sums -q --quiet -r --reinst -s --show
+                                   -u --unpack -z' -- "$cur" ) )
     fi
 
 }
