@@ -414,7 +414,38 @@ download(){
 }
 
 error(){
-    echo "${script}:ERROR: $@" >&2
+    echo "$PROGRAM:ERROR: $@" >&2
+}
+
+fast(){
+    auto
+    quiet
+    REINSTALL=1
+
+    for dir in "$@"; do
+        build "$dir"
+    done
+}
+
+# aquire the package destination filename
+findpackage(){
+
+    # NOTE: apt-get will output nothing if package exists in the
+    #       current directory, hence the need to cd out if. This
+    #       is quite hackish but the alternative would be manually
+    #       parsing `apt-cache show "$package"`.
+
+    local tempdir=$(mktemp --directory 2>/dev/null)
+
+    while IFS= read -r string; do
+        destination=$(cd "$tempdir" && apt-get --print-uris download "$string" 2>/dev/null | awk '{print $2}')
+        if [[ -n $destination ]]; then
+            fullpackage=$string
+            break
+        fi
+    done < <("$PROGRAM" --show --format "$1" 2>/dev/null | awk '{print $NF}')
+
+    rmdir "$tempdir" &>/dev/null
 }
 
 # enable format option
