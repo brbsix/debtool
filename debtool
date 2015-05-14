@@ -780,13 +780,14 @@ usage(){
 	  -u, --unpack          unpack ARCHIVE or installed PKG into DIR
 
 	Combination Options
-	  -c, --combo           download then unpack PKG(s) [-du]
-	  -z, --fast            build fast [-abr]
+	  -c, --combo           download and unpack PKG(s) [-du]
+	  -z, --fast            build and reinstall DIR(s) [-abr]
 
 	Miscellaneous Options
-	  -a, --auto            skip any prompts for user input
-	  -f, --show-format     format output of --show
-	  -q, --quiet           suppress normal messages
+	  -a, --auto            skip prompts for user input
+	  -f, --format          format output of --show for manual download
+	  -m, --md5sums         generate new md5sums (otherwise rebuild original)
+	  -q, --quiet           suppress normal output
 
 	Some mandatory options may be combined. Combination options include '--auto --download --unpack' (equivalent --combo), '--auto --build --reinst --quiet' (equivalent to --fast), and '--build --reinst'.
 
