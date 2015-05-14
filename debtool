@@ -589,18 +589,6 @@ remove_backup(){
     fi
 }
 
-# # remove an archive backup (from the same dir)
-# remove_backup(){
-#     if [[ -f "${archive}~" && $backup = 'true' ]]; then
-#         rm "${archive}~"
-#         if [[ -f "${archive}~" ]]; then
-#             info "Failed to remove backup file '${archive}~'"
-#         else
-#             info "Removed backup file '${archive}~'"
-#         fi
-#     fi
-# }
-
 # restore an archive backup (from a temp dir)
 restore_backup(){
     if [[ -n $BACKUPFILE ]]; then
@@ -613,18 +601,6 @@ restore_backup(){
         rmdir "$BACKUPDIR"
     fi
 }
-
-# restore an archived backup (from the same dir)
-# restore_backup(){
-#     if [[ -f "${archive}~" && $backup = 'true' ]]; then
-#         mv "${archive}~" "$archive"
-#         if [[ -f $archive ]]; then
-#             info "Restored '$archive' from backup"
-#         else
-#             info "Failed to restore '$archive' from backup"
-#         fi
-#     fi
-# }
 
 # show packages available for download
 show(){
