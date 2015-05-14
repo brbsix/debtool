@@ -457,6 +457,29 @@ info(){
     echo "$PROGRAM:INFO: $@"
 }
 
+# download a package interactively
+interactive(){
+    if (( $# > 1 )); then
+        error "Too many arguments"
+        exit 1
+    fi
+
+    (
+        readarray -t packages < <("$PROGRAM" --show "$1")
+
+        select choice in "${packages[@]}" EXIT; do
+            if [[ -z $choice ]]; then
+                error "Invalid selection"
+                continue
+            elif [[ $choice = EXIT ]]; then
+                exit 1
+            fi
+
+            "$PROGRAM" --download "${choice/ /=}" && return 0
+        done
+    )
+}
+
 # enable option to create new md5sums
 md5(){
     MD5=1
@@ -775,6 +798,7 @@ usage(){
 	Mandatory Options
 	  -b, --build           create a debian archive from DIR
 	  -d, --download        download PKGS(s) via apt-get
+	  -i, --interactive     download PKG interactively (select specific version)
 	  -r, --reinst          reinstall ARCHIVE(s)
 	  -s, --show            show PKG(s) available for download
 	  -u, --unpack          unpack ARCHIVE or installed PKG into DIR
@@ -808,8 +832,8 @@ if (( $# == 1 )) && [[ $1 =~ ^(-h|--help|help)$ ]]; then
     usage
 fi
 
-shopts='a,b,c,d,f,m,q,r,s,u,v,z'
-lopts='auto,build,combo,download,fast,format,md5sums,quiet,reinst,show,unpack,version'
+shopts='a,b,c,d,f,i,m,q,r,s,u,v,z'
+lopts='auto,build,combo,download,fast,format,interactive,md5sums,quiet,reinst,show,unpack,version'
 
 params=$(getopt -o "$shopts" -l "$lopts" -n "$PROGRAM" -- "$@") || exit 1
 
@@ -835,6 +859,10 @@ while true; do
             ;;
         -f|--format)
             format
+            shift
+            ;;
+        -i|--interactive)
+            cmds+=('interactive')
             shift
             ;;
         -m|--md5sums)
