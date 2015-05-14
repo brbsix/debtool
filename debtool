@@ -304,13 +304,6 @@ combo(){
             # unpack downloaded archive
             if [[ -n $output ]]; then
                 unpack "$destination"
-            # prompt to unpack pre-existing archive (if auto is not enabled)
-            elif (( AUTO != 1 )); then
-                read -p "Would you like to unpack pre-existing archive '$destination'? "
-                if [[ ${REPLY,} = y* ]]; then
-                    unpack "$destination"
-                fi
-            # skip prompt (if auto is enabled)
             else
                 echo "Skipping unpack of pre-existing archive '$destination'"
             fi
