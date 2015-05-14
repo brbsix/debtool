@@ -728,6 +728,10 @@ unpack(){
         dpkg-deb --raw-extract "$1" "$target"
 
     elif [[ $pkgtype = installation ]]; then
+
+        # perform additional dependency check
+        check_dependency unpack_installation
+
         if [[ -n $2 ]]; then
             # set target to supplied argument
             local target=$2
