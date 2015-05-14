@@ -833,7 +833,7 @@ while true; do
             cmds+=('download')
             shift
             ;;
-        -f|--show-format)
+        -f|--format)
             format
             shift
             ;;
