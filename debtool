@@ -5,7 +5,7 @@
 
 # enable auto option
 auto(){
-    auto='enabled'
+    AUTO=1
 }
 
 # create a debian archive from a directory
@@ -21,7 +21,7 @@ build(){
         prep_build "$1"
 
         if [[ -n $2 ]]; then
-            archive=$2
+            ARCHIVE=$2
         else
 
             # identify control file
@@ -34,20 +34,20 @@ build(){
             fi
 
             # determine archive name from contents of control file
-            archive=$(awk '/^Package: / { p=$2 }; /^Version: / { v=$2 }; /^Architecture: / { a=$2 }; END{ if ( length(p) == 0 || length(v) == 0 ) exit; if ( length(a) > 0 ) { printf "%s_%s_%s.deb", p, v, a } else { printf "%s_%s.deb", p, v } }' "$control" 2>/dev/null)
+            ARCHIVE=$(awk '/^Package: / { p=$2 }; /^Version: / { v=$2 }; /^Architecture: / { a=$2 }; END{ if ( length(p) == 0 || length(v) == 0 ) exit; if ( length(a) > 0 ) { printf "%s_%s_%s.deb", p, v, a } else { printf "%s_%s.deb", p, v } }' "$control" 2>/dev/null)
 
             # verify control file was parsed
-            if [[ -z $archive ]]; then
+            if [[ -z $ARCHIVE ]]; then
                 error "Unparsable control file '$control'"
                 exit 1
             fi
         fi
 
-        check_build_destination "$1" "$archive"
+        check_build_destination "$1" "$ARCHIVE"
 
         # build the archive
-        # fakeroot dpkg-deb --build "${1%/}" "$archive"
-        fakeroot dpkg-deb --build "$1" "$archive"
+        # fakeroot dpkg-deb --build "${1%/}" "$ARCHIVE"
+        fakeroot dpkg-deb --build "$1" "$ARCHIVE"
 
         # check if build failed
         if (( $? != 0 )); then
@@ -57,15 +57,15 @@ build(){
         fi
 
         # check if archive was created and handle backup
-        if [[ -f $archive ]]; then
+        if [[ -f $ARCHIVE ]]; then
             remove_backup
         else
             restore_backup
             exit 1
         fi
 
-        if [[ $reinstall = 'true' ]]; then
-            reinst "$archive"
+        if (( REINSTALL == 1 )); then
+            reinst "$ARCHIVE"
         fi
     )
 }
@@ -77,7 +77,7 @@ build(){
 #         prep_build "$1"
 
 #         if [[ -n $2 ]]; then
-#             archive=$2
+#             ARCHIVE=$2
 #         else
 
 #             # identify archive control file
@@ -90,15 +90,15 @@ build(){
 #             fi
 
 #             # determine archive name from contents of control file
-#             archive=$(awk '/^Package: / { p=$2 }; /^Version: / { v=$2 }; /^Architecture: / { a=$2 }; END{ if ( length(a) > 0 ) { printf "%s_%s_%s.deb", p, v, a } else { printf "%s_%s.deb", p, v } }' "$control")
+#             ARCHIVE=$(awk '/^Package: / { p=$2 }; /^Version: / { v=$2 }; /^Architecture: / { a=$2 }; END{ if ( length(a) > 0 ) { printf "%s_%s_%s.deb", p, v, a } else { printf "%s_%s.deb", p, v } }' "$control")
 
 #         fi
 
-#         check_build_destination "$1" "$archive"
+#         check_build_destination "$1" "$ARCHIVE"
 
 #         # build the archive
-#         # fakeroot dpkg-deb --build "${1%/}" "$archive"
-#         fakeroot dpkg-deb --build "$1" "$archive"
+#         # fakeroot dpkg-deb --build "${1%/}" "$ARCHIVE"
+#         fakeroot dpkg-deb --build "$1" "$ARCHIVE"
 
 #         # check if build failed
 #         if (( $? != 0 )); then
@@ -108,15 +108,15 @@ build(){
 #         fi
 
 #         # check if archive was created and handle backup
-#         if [[ -f $archive ]]; then
+#         if [[ -f $ARCHIVE ]]; then
 #             remove_backup
 #         else
 #             restore_backup
 #             exit 1
 #         fi
 
-#         if [[ $reinstall = 'true' ]]; then
-#             reinst "$archive"
+#         if (( REINSTALL == 1 )); then
+#             reinst "$ARCHIVE"
 #         fi
 #     else
 #         if [[ -n $1 ]]; then
@@ -132,7 +132,7 @@ build(){
 # ensure build destination does not already exist
 check_build_destination(){
     if [[ -e $2 && -f $2 ]]; then
-        if [[ $auto != enabled ]]; then
+        if (( AUTO != 1 )); then
 
             # prompt to overwrite pre-existing file
             read -p "Overwrite pre-existing file '$2' (y|N)? "
@@ -253,18 +253,19 @@ combo(){
 create_backup(){
 
     # create a temporary directory
-    tempdir=$(mktemp --directory 2>/dev/null)
-    if [[ ! -d $tempdir ]]; then
+    BACKUPDIR=$(mktemp --directory 2>/dev/null)
+    if [[ ! -d $BACKUPDIR ]]; then
         error "Experienced unknown error while creating temporary directory"
         echo "Please remove the pre-existing file and try again"
         exit 1
     fi
 
     # backup pre-existing file
-    mv "$2" "$tempdir"
-    if [[ -f "$tempdir/${2##*/}" ]]; then
-        backup="$tempdir/${2##*/}"
-        info "Storing backup of '$2' at '$backup'"
+    mv "$2" "$BACKUPDIR"
+
+    if [[ -f $BACKUPDIR/${2##*/} ]]; then
+        BACKUPFILE=$BACKUPDIR/${2##*/}
+        info "Storing backup of '$2' at '$BACKUPFILE'"
     else
         info "Failed to backup '$2'"
     fi
@@ -317,7 +318,7 @@ error(){
 
 # enable format option
 format(){
-    format='enabled'
+    FORMAT=1
 }
 
 info(){
@@ -395,7 +396,7 @@ prep_md5sums(){
 
 # enable quiet option
 quiet(){
-    quiet='>/dev/null'
+    QUIET='>/dev/null'
 }
 
 # reinstall package(s)
@@ -437,9 +438,9 @@ reinst(){
 
 # remove an archive backup (from a temp dir)
 remove_backup(){
-    if [[ -n $backup ]]; then
-        rm "$backup"
-        rmdir "$tempdir"
+    if [[ -n $BACKUPFILE ]]; then
+        rm "$BACKUPFILE"
+        rmdir "$BACKUPDIR"
     fi
 }
 
@@ -457,14 +458,14 @@ remove_backup(){
 
 # restore an archive backup (from a temp dir)
 restore_backup(){
-    if [[ -n $backup ]]; then
-        mv -T "$backup" "$archive"
-        if [[ -f $archive ]]; then
-            info "Restored '$archive' from backup"
+    if [[ -n $BACKUPFILE ]]; then
+        mv -T "$BACKUPFILE" "$ARCHIVE"
+        if [[ -f $ARCHIVE ]]; then
+            info "Restored '$ARCHIVE' from backup"
         else
-            info "Failed to restore '$archive' from backup"
+            info "Failed to restore '$ARCHIVE' from backup"
         fi
-        rmdir "$tempdir"
+        rmdir "$BACKUPDIR"
     fi
 }
 
@@ -483,15 +484,14 @@ restore_backup(){
 # show packages available for download
 show(){
 
-    for package in "$@"; do
-
-        if [[ $format = enabled ]]; then
-            printstr='printf "apt-get download %s=%s -a=%s\n", p, v, a'
-        else
-            printstr='print p, v, a'
-        fi
-
-        results=$(apt-cache show "$package" 2>/dev/null | awk "/^Package: /{p=\$2} /^Version: /{v=\$2} /^Architecture/{a=\$2} /^$/{ $printstr }")
+    # set the output format string
+    if (( FORMAT == 1 )); then
+        local printFULL='printf "apt-get download %s:%s=%s\n", p, a, v'
+        local printBRIEF='printf "apt-get download %s=%s\n", p, v'
+    else
+        local printFULL='print p, v, a'
+        local printBRIEF='print p, v'
+    fi
 
         if (( $? != 0 )) || [[ -z $results ]]; then
             error "apt-cache is unable to locate package '$package'"
@@ -510,6 +510,7 @@ unpack(){
     pkgtype=$(pkgtype "$1") || exit 1
 
     if [[ $pkgtype = archive ]]; then
+
         if [[ -n $2 ]]; then
             local target=$2
         else
@@ -546,7 +547,7 @@ unpack(){
     echo "Successfully unpacked $pkgtype to: $target"
 
     # prompt to delete archive
-    if [[ $pkgtype = archive && $auto != enabled ]]; then
+    if [[ $pkgtype = archive ]] && (( AUTO != 1 )); then
         read -p "Remove '$1'? "
         if [[ ${REPLY,} = y* ]]; then
             rm "$1"
@@ -732,7 +733,7 @@ elif (( ${#cmds[@]} == 2 )) && [[ "${cmds[@]}" = *download* && "${cmds[@]}" = *u
     cmd='combo'
 elif (( ${#cmds[@]} == 2 )) && [[ "${cmds[@]}" = *build* && "${cmds[@]}" = *reinst* ]]; then
     cmd='build'
-    reinstall='true'
+    REINSTALL=1
 else
     error "Too many commands"
     exit 1
@@ -740,4 +741,4 @@ fi
 
 check_dependency "$cmd"
 
-eval -- "$cmd" "$@" "$quiet"
+eval -- "$cmd" "$@" "$QUIET"
