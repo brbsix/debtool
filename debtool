@@ -493,53 +493,90 @@ prep_build(){
     ) || exit 1
 }
 
-# remake md5sums using original as a template
-prep_md5sums(){
-    mv "DEBIAN/md5sums" "DEBIAN/md5sums~" &&
-    awk '{printf "%s\0", $2}' "DEBIAN/md5sums~" \
-    | xargs -0r md5sum > DEBIAN/md5sums &&
-    rm "DEBIAN/md5sums~" &&
-    chmod 644 "DEBIAN/md5sums"
-}
-
 # enable quiet option
 quiet(){
     QUIET='>/dev/null'
 }
 
+# # reinstall package(s)
+# reinst(){
+
+#     local z
+
+#     for archive in "$@"; do
+
+#         # confirm archive is a file
+#         if [[ ! -f $ARCHIVE ]]; then
+#             error "'$ARCHIVE' does not appear to be a valid file"
+#             z=1
+#             continue
+#         fi
+
+#         # lookup package name in archive control file
+#         local package=$(dpkg-deb -f "$ARCHIVE" package 2>/dev/null)
+
+#         # confirm lookup of package name was successful
+#         if [[ -z $package ]]; then
+#             error "'$ARCHIVE' does not appear to be a valid debian archive"
+#             z=1
+#             continue
+#         fi
+
+#         # if sudo apt-get purge "$package" &>/dev/null; then
+#         if sudo dpkg --purge "$package" &>/dev/null; then
+#             echo "dpkg: purged '$package'"
+#         else
+#             echo "dpkg: failed to purge '$package' (perhaps it was not installed)"
+#         fi
+
+#         if sudo dpkg --install "$ARCHIVE" &>/dev/null; then
+#             echo "dpkg: installed '$package' ($ARCHIVE)"
+#             z=0
+#         else
+#             echo "dpkg: failed to install '$package' ($ARCHIVE)"
+#             z=1
+#         fi
+
+#     done
+
+#     return "$z"
+# }
+
 # reinstall package(s)
 reinst(){
 
+    # reinstall each package within a subshell (no need for local or unset)
     for archive in "$@"; do
+        (
+            # confirm archive is a file
+            if [[ ! -f $archive ]]; then
+                error "'$archive' does not appear to be a valid file"
+                return 1
+            fi
 
-        # confirm archive is a file
-        if [[ ! -f $archive ]]; then
-            error "'$archive' does not appear to be a valid file"
-            continue
-        fi
+            # lookup package name in archive control file
+            package=$(dpkg-deb -f "$archive" package 2>/dev/null)
 
-        # lookup package name in archive control file
-        package=$(dpkg-deb -f "$archive" package 2>/dev/null)
+            # confirm lookup of package name was successful
+            if [[ -z $package ]]; then
+                error "'$archive' does not appear to be a valid debian archive"
+                return 1
+            fi
 
-        # confirm lookup of package name was successful
-        if [[ -z $package ]]; then
-            error "'$archive' does not appear to be a valid debian archive"
-            continue
-        fi
+            # if sudo apt-get purge "$package" &>/dev/null; then
+            if sudo dpkg --purge "$package" &>/dev/null; then
+                echo "dpkg: purged '$package'"
+            else
+                echo "dpkg: failed to purge '$package' (perhaps it was not installed)"
+            fi
 
-        # if sudo apt-get purge "$package" &>/dev/null; then
-        if sudo dpkg --purge "$package" &>/dev/null; then
-            echo "dpkg: purged '$package'"
-        else
-            echo "dpkg: failed to purge '$package' (perhaps it was not installed)"
-        fi
-
-        if sudo dpkg --install "$archive" &>/dev/null; then
-            echo "dpkg: installed '$package' ($archive)"
-        else
-            echo "dpkg: failed to install '$package' ($archive)"
-        fi
-
+            if sudo dpkg --install "$archive" &>/dev/null; then
+                echo "dpkg: installed '$package' ($archive)"
+            else
+                echo "dpkg: failed to install '$package' ($archive)"
+                return 1
+            fi
+        )
     done
 
 }
