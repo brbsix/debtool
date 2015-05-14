@@ -802,6 +802,7 @@ warning(){
 
 
 PROGRAM=${0##*/}
+VERSION='0.1.0'
 
 if (( $# == 1 )) && [[ $1 =~ ^(-h|--help|help)$ ]]; then
     usage
@@ -856,6 +857,13 @@ while true; do
         -u|--unpack)
             cmds+=('unpack')
             shift
+            ;;
+        -v|--version)
+            echo "$PROGRAM $VERSION"
+            echo
+            echo "Author: Brian Beffa <brbsix@gmail.com>"
+            echo "Copyright © 2015"
+            exit 0
             ;;
         -z|--fast)
             auto
