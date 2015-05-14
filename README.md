@@ -30,31 +30,45 @@ Usage
 
     Mandatory Options
       -b, --build           create a debian archive from DIR
-      -c, --combo           download then unpack PKG(s)
       -d, --download        download PKGS(s) via apt-get
+      -i, --interactive     download PKG interactively (select specific version)
       -r, --reinst          reinstall ARCHIVE(s)
       -s, --show            show PKG(s) available for download
       -u, --unpack          unpack ARCHIVE or installed PKG into DIR
 
+    Combination Options
+      -c, --combo           download and unpack PKG(s) [-du]
+      -z, --fast            build and reinstall DIR(s) [-abr]
+
     Miscellaneous Options
-      -a, --auto            skip any prompts for user input
-      -f, --show-format     format output of --show
-      -q, --quiet           suppress normal messages
+      -a, --auto            skip prompts for user input
+      -f, --format          format output of --show for manual download
+      -m, --md5sums         generate new md5sums (otherwise rebuild original)
+      -q, --quiet           suppress normal output
 
-    Some mandatory options may be combined. Valid combinations include '--auto
-    --download --unpack' (equivalent --combo), '--auto --build --reinst --quiet'
-    (equivalent to --fast), and '--build --reinst'.
+    Some mandatory options may be combined. Combination options include '--auto --download --unpack' (equivalent --combo), '--auto --build --reinst --quiet' (equivalent to --fast), and '--build --reinst'.
 
-    NOTE: ARCHIVE refers to a '.deb' debian archive. PKG refers to program
-          available to download or an installed program to unpack.
+    NOTE: ARCHIVE refers to a '.deb' debian archive. PKG refers to program available to download or an installed program to unpack.
 
 To download a debian package (from apt sources):
 
     debtool --download unar
 
+To download a specific version of a debian package:
+
+    debtool --download gdebi=0.9.5.3ubuntu2
+
+To download a specific architecture and version of a debian package:
+
+    debtool --download unar:amd64=1.8.1-2
+
 You can even supply multiple package names at once if you'd like...
 
     debtool --download git mawk unar
+
+To download a package interactively and select among multiple versions:
+
+    debtool --interactive git
 
 To unpack a debian package:
 
@@ -88,15 +102,19 @@ To show the versions and architectures of packages available for download (i.e. 
 
     debtool --show PACKAGE
 
-To show the versions and achitectures of packages available for download, formatted for manual installation (i.e. `apt-get download gawk=1:4.0.1+dfsg-2.1ubuntu2 -a=amd64`):
+To show the versions and achitectures of packages available for download, formatted for manual installation (i.e. `apt-get download gawk:amd64=1:4.0.1+dfsg-2.1ubuntu2`):
 
-    debtool --show --show-format PACKAGE
+    debtool --show --format PACKAGE
 
 Some mandatory options may be combined. Valid combinations include '--auto --download --unpack' (equivalent --combo), '--auto --build --reinst --quiet' (equivalent to --fast), and '--build --reinst'.
 
     debtool -du git mawk unar
 
     debtool -br DIRECTORY
+
+During normal build operations, `debtools` simply recalculates the existing md5sums. However if you add new files to the package you will want to use the md5sums option during build to create the md5sums from scratch.
+
+    debtool --build --md5sums DIRECTORY
 
 License
 -------
