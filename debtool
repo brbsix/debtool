@@ -614,15 +614,33 @@ show(){
         local printBRIEF='print p, v'
     fi
 
-        if (( $? != 0 )) || [[ -z $results ]]; then
-            error "apt-cache is unable to locate package '$package'"
-            continue
-        else
-            echo "$results"
-        fi
+    # show each package details within a subshell (no need for local or unset)
+    for package in "$@"; do
+        (
+            set -o pipefail
 
+            # parse APT's package cache for the package in question
+            apt-cache show "$package" 2>/dev/null | awk "/^Package: /{p=\$2} /^Version: /{v=\$2} /^Architecture/{a=\$2} /^$/{ if (a==\"all\") { $printBRIEF } else { $printFULL } }" || \
+            {
+                error "apt-cache is unable to locate package '$package'"
+                return 1
+            }
+        )
     done
 }
+
+# show_worker(){
+#     (
+#         set -o pipefail
+
+#         # parse APT's package cache for the package in question
+#         apt-cache show "$1" 2>/dev/null | awk "/^Package: /{p=\$2} /^Version: /{v=\$2} /^Architecture/{a=\$2} /^$/{ if (a==\"all\") { $printBRIEF } else { $printFULL } }" || \
+#         {
+#             error "apt-cache is unable to locate package '$1'"
+#             return 1
+#         }
+#     )
+# }
 
 # unpack a debian archive or installed package
 unpack(){
