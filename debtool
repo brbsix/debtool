@@ -465,7 +465,7 @@ interactive(){
     fi
 
     (
-        readarray -t packages < <("$PROGRAM" --show "$1")
+        readarray -t packages < <("$PROGRAM" --show --format "$1" | awk '{print $NF}')
 
         select choice in "${packages[@]}" EXIT; do
             if [[ -z $choice ]]; then
@@ -475,7 +475,7 @@ interactive(){
                 exit 1
             fi
 
-            "$PROGRAM" --download "${choice/ /=}" && return 0
+            "$PROGRAM" --download "$choice" && return 0
         done
     )
 }
