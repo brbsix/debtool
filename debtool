@@ -715,8 +715,10 @@ unpack(){
     if [[ $pkgtype = archive ]]; then
 
         if [[ -n $2 ]]; then
+            # set target to supplied argument
             local target=$2
         else
+            # set target from parsed control file
             local target=$(dpkg-deb --field "$1" package version architecture | awk '{print $2}' | paste -sd_)
         fi
 
@@ -724,10 +726,13 @@ unpack(){
 
         # unpack archive
         dpkg-deb --raw-extract "$1" "$target"
+
     elif [[ $pkgtype = installation ]]; then
         if [[ -n $2 ]]; then
+            # set target to supplied argument
             local target=$2
         else
+            # set target to program's name
             local target=$1
         fi
 
