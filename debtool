@@ -321,33 +321,38 @@ info(){
     echo "$PROGRAM:INFO: $@"
 }
 
+
 # download a package interactively
 interactive(){
-    if (( $# > 1 )); then
-        error "Too many arguments"
-        exit 1
-    fi
 
-    (
-        readarray -t packages < <("$PROGRAM" --show --format "$1" | awk '{print $NF}')
+    local program
 
-        select choice in "${packages[@]}" EXIT; do
-            if [[ -z $choice ]]; then
-                error "Invalid selection"
-                continue
-            elif [[ $choice = EXIT ]]; then
-                exit 1
-            fi
+    for program in "$@"; do
+        (
+            readarray -t packages < <("$PROGRAM" --show --format "$program" | awk '{print $NF}')
 
-            "$PROGRAM" --download "$choice" && return 0
-        done
-    )
+            (( ${#packages[@]} == 0 )) && return 1
+
+            echo
+            echo "$program"
+            echo "----------"
+
+            select choice in "${packages[@]}" SKIP; do
+                if [[ -z $choice ]]; then
+                    error "Invalid selection"
+                    continue
+                elif [[ $choice = SKIP ]]; then
+                    return 1
+                fi
+
+                if "$PROGRAM" --download "$choice"; then
+                    return 0
+                fi
+            done
+        )
+    done
 }
 
-# enable option to create new md5sums
-md5(){
-    MD5=1
-}
 
 # make md5sums from scratch
 md5sums_make(){
