@@ -302,9 +302,9 @@ findpackage(){
     local tempdir=$(mktemp --directory 2>/dev/null)
 
     while IFS= read -r string; do
-        destination=$(cd "$tempdir" && apt-get --print-uris download "$string" 2>/dev/null | awk '{print $2}')
-        if [[ -n $destination ]]; then
-            fullpackage=$string
+        DESTINATION=$(cd "$tempdir" && apt-get --print-uris download "$string" 2>/dev/null | awk '{print $2}')
+        if [[ -n $DESTINATION ]]; then
+            FULLPACKAGE=$string
             break
         fi
     done < <("$PROGRAM" --show --format "$1" 2>/dev/null | awk '{print $NF}')
