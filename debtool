@@ -1,9 +1,9 @@
 #!/bin/bash
 #
-# Simple tool to facilitate downloading and repacking debian archives
+# Simple tool to facilitate downloading and repacking Debian archives
 
 
-# create a debian archive from a directory
+# create a Debian archive from a directory
 build(){
     (
         # NOTE: child functions inherit the parent's environment (to include local)...
@@ -396,19 +396,19 @@ md5sums_remake(){
 # determing package type (archive, installation, neither, or both)
 pkgtype(){
     (
-        # for a debian archive file
+        # for a Debian archive file
         dpkg-deb --info "$1" &>/dev/null && pkgtype+=('archive')
 
         # for an installed package
         [[ $(dpkg-query --show --showformat="\${Status}" "$1" 2>/dev/null) = 'install ok installed' ]] && pkgtype+=('installation')
 
         if (( ${#pkgtype[@]} == 0 )); then
-            error "'$1' is not an installed package or valid debian archive"
+            error "'$1' is not an installed package or valid Debian archive"
             return 1
         elif (( ${#pkgtype[@]} == 1 )); then
             echo "${pkgtype[0]}"
         elif (( ${#pkgtype[@]} == 2 )); then
-            warning "'$1' is an installed package and a debian archive (assuming you intended the debian archive)"
+            warning "'$1' is an installed package and a Debian archive (assuming you intended the Debian archive)"
             echo archive
         fi
     )
@@ -488,7 +488,7 @@ reinst(){
 
             # confirm lookup of package name was successful
             if [[ -z $package ]]; then
-                error "'$archive' does not appear to be a valid debian archive"
+                error "'$archive' does not appear to be a valid Debian archive"
                 return 1
             fi
 
@@ -561,10 +561,10 @@ show(){
 }
 
 
-# unpack a debian archive or installed package
+# unpack a Debian archive or installed package
 unpack(){
     (
-        # determine package type (debian archive or installed) and exit if neither
+        # determine package type (Debian archive or installed) and exit if neither
         pkgtype=$(pkgtype "$1") || return 1
 
         if [[ $pkgtype = archive ]]; then
@@ -627,10 +627,10 @@ unpack(){
 usage(){
     cat <<-EOF
 	Usage: $PROGRAM OPTION ARCHIVE|DIRECTORY|PACKAGE TARGET
-	Manipulate debian archives.
+	Manipulate Debian archives.
 
 	Mandatory Options
-	  -b, --build           create a debian archive from DIR
+	  -b, --build           create a Debian archive from DIR
 	  -d, --download        download PKGS(s) via apt-get
 	  -i, --interactive     download PKG interactively (select specific version)
 	  -r, --reinst          reinstall ARCHIVE(s)
@@ -649,7 +649,7 @@ usage(){
 
 	Some mandatory options may be combined. Combination options include '--auto --download --unpack' (equivalent --combo), '--auto --build --reinst --quiet' (equivalent to --fast), and '--build --reinst'.
 
-	NOTE: ARCHIVE refers to a '.deb' debian archive. PKG refers to program available to download or an installed program to unpack.
+	NOTE: ARCHIVE refers to a '.deb' Debian archive. PKG refers to program available to download or an installed program to unpack.
 	EOF
     exit 0
 }
