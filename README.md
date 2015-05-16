@@ -1,13 +1,13 @@
 # debtool
 
-debtool is a wrapper around several other utilities that aims to simplify the workflow for downloading, unpacking, repacking, and reinstalling Debian packages. It is especially handy if you want to download .deb files, incorporate quick bug fixes, alter package requirements, et cetera without the trouble of building from sources. You can even rebuild packages that are no longer available from your apt repositories (so long as you have them installed).
+`debtool` is a wrapper around several other utilities that aims to simplify the workflow for downloading, unpacking, repacking, and reinstalling Debian packages. It is especially handy if you want to download .deb files, incorporate quick bug fixes, alter package requirements, et cetera without the trouble of building from sources. You can even rebuild packages that are no longer available from your apt repositories (so long as you have them installed).
 
 As with all of my programs, feel free to let me know if you have any feedback or encounter any issues.
 
 Installation
 ------------
 
-To install debtool on Linux systems:
+To install `debtool` on Linux systems:
 
     sudo install debtool /usr/local/bin
     sudo install -m 0644 debtool-completion /etc/bash_completion.d/debtool
@@ -121,7 +121,7 @@ Some mandatory options may be combined. Valid combinations include (but are not 
     debtool -du git mawk unar
     debtool -br DIRECTORY
 
-During normal build operations, `debtools` simply updates md5sums, using the pre-existing file as a template. However, if new files are added to the package (or if the md5sums file is missing) you will want to use the `--md5sums` option during build to generate md5sums from scratch.
+During normal build operations, `debtool` simply updates md5sums, using the pre-existing file as a template. However, if new files are added to the package (or if the md5sums file is missing) you will want to use the `--md5sums` option during build to generate md5sums from scratch.
 
     debtool --build --md5sums DIRECTORY
 
