@@ -655,6 +655,15 @@ usage(){
 }
 
 
+version(){
+    cat<<-EOF
+	$PROGRAM $VERSION
+
+	Copyright (c) 2015 Six (brbsix@gmail.com)
+	EOF
+    exit 0
+}
+
 warning(){
     echo "$PROGRAM:WARNING: $@" >&2
 }
@@ -721,11 +730,7 @@ while true; do
             shift
             ;;
         -v|--version)
-            echo "$PROGRAM $VERSION"
-            echo
-            echo "Author: Brian Beffa <brbsix@gmail.com>"
-            echo "Copyright © 2015"
-            exit 0
+            version
             ;;
         -z|--fast)
             cmds+=('fast')
