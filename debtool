@@ -472,6 +472,8 @@ prep_build(){
 # reinstall package(s)
 reinst(){
 
+    local archive
+
     # reinstall each package within a subshell (no need for local or unset)
     for archive in "$@"; do
         (
@@ -505,8 +507,8 @@ reinst(){
             fi
         )
     done
-
 }
+
 
 # remove an archive backup (from a temp dir)
 remove_backup(){
@@ -515,6 +517,7 @@ remove_backup(){
         rmdir "$BACKUPDIR"
     fi
 }
+
 
 # restore an archive backup (from a temp dir)
 restore_backup(){
