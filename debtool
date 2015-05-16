@@ -207,7 +207,7 @@ create_backup(){
         BACKUPFILE=$BACKUPDIR/${2##*/}
         info "Storing backup of '$2' at '$BACKUPFILE'"
     else
-        info "Failed to backup '$2'"
+        warning "Failed to backup '$2'"
     fi
 
 }
@@ -447,10 +447,10 @@ prep_build(){
         else
             # ensure original md5sums exists
             if [[ ! -f $ms ]]; then
-                info "No pre-existing '$ms'"
+                warning "No pre-existing '$ms'"
             # ensure original md5sums is writable
             elif [[ ! -w $ms ]]; then
-                info "No write access to '$ms'"
+                warning "No write access to '$ms'"
             # ensure remake of md5sums
             else
                 md5sums_remake || {
@@ -526,7 +526,7 @@ restore_backup(){
         if [[ -f $ARCHIVE ]]; then
             info "Restored '$ARCHIVE' from backup"
         else
-            info "Failed to restore '$ARCHIVE' from backup"
+            warning "Failed to restore '$ARCHIVE' from backup"
         fi
         rmdir "$BACKUPDIR"
     fi
