@@ -35,11 +35,11 @@ Other required packages that are most likely already installed on your system:
 Usage
 -----
 
-    Usage: debtool OPTION [ARCHIVE|DIRECTORY|PACKAGE] [TARGET]
-    Manipulate debian archives.
+    Usage: debtool OPTION ARCHIVE|DIRECTORY|PACKAGEd [TARGET]
+    Manipulate Debian archives.
 
     Mandatory Options
-      -b, --build           create a debian archive from DIR
+      -b, --build           create a Debian archive from DIR
       -d, --download        download PKGS(s) via apt-get
       -i, --interactive     download PKG interactively (select specific version)
       -r, --reinst          reinstall ARCHIVE(s)
@@ -58,17 +58,17 @@ Usage
 
     Some mandatory options may be combined. Combination options include '--auto --download --unpack' (equivalent --combo), '--auto --build --reinst --quiet' (equivalent to --fast), and '--build --reinst'.
 
-    NOTE: ARCHIVE refers to a '.deb' debian archive. PKG refers to program available to download or an installed program to unpack.
+    NOTE: ARCHIVE refers to a '.deb' Debian archive. PKG refers to program available to download or an installed program to unpack.
 
-To download a debian package (from apt sources):
+To download a Debian package (from apt sources):
 
     debtool --download unar
 
-To download a specific version of a debian package:
+To download a specific version of a Debian package:
 
     debtool --download gdebi=0.9.5.3ubuntu2
 
-To download a specific architecture and version of a debian package:
+To download a specific architecture and version of a Debian package:
 
     debtool --download unar:amd64=1.8.1-2
 
@@ -80,7 +80,7 @@ To download a package interactively and select among multiple versions:
 
     debtool --interactive git
 
-To unpack a debian package:
+To unpack a Debian package:
 
     debtool --unpack unar_1.8.1-2_amd64.deb
 
