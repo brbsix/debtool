@@ -352,35 +352,46 @@ interactive(){
 
 # make md5sums from scratch
 md5sums_make(){
+    (
+        ms=DEBIAN/md5sums
 
-    mv 'DEBIAN/md5sums' 'DEBIAN/md5sums~' &>/dev/null
+        # backups existing md5sums
+        mv "$ms" "$ms~" &>/dev/null
 
-    find -type f ! -path '*/DEBIAN/*' -printf '%P\0' | LC_ALL=C sort -z | xargs -0r -- md5sum > DEBIAN/md5sums
+        # create new md5sums
+        find -type f ! -path '*/DEBIAN/*' -printf '%P\0' | LC_ALL=C sort -z | xargs -0r -- md5sum > "$ms"
 
-    # get file size
-    local size=$(stat --format=%s 'DEBIAN/md5sums' 2>/dev/null)
+        # get file size of md5sums
+        size=$(stat --format=%s "$ms" 2>/dev/null)
 
-    # ensure file is not empty (use string comparison)
-    [[ $size = 0 ]] && rm 'DEBIAN/md5sums'
+        # ensure file is not empty
+        [[ $size = 0 ]] && rm "$ms"
 
-    if [[ -f DEBIAN/md5sums ]]; then
-        rm 'DEBIAN/md5sums~' &>/dev/null
-        chmod 644 'DEBIAN/md5sums'
-        return 0
-    else
-        return 1
-    fi
-
+        # check if md5sums was created
+        if [[ -f $ms ]]; then
+            rm "$ms~" &>/dev/null
+            chmod 644 "$ms"
+            return 0
+        else
+            return 1
+        fi
+    )
 }
+
 
 # remake md5sums using original as a template
 md5sums_remake(){
-    mv 'DEBIAN/md5sums' 'DEBIAN/md5sums~' &&
-    awk '{printf "%s\0", $2}' 'DEBIAN/md5sums~' \
-    | xargs -0r md5sum > DEBIAN/md5sums &&
-    rm 'DEBIAN/md5sums~' &&
-    chmod 644 'DEBIAN/md5sums'
+    (
+        ms=DEBIAN/md5sums
+
+        mv "$ms" "$ms~" &&
+        awk '{printf "%s\0", $2}' "$ms~" \
+        | xargs -0r md5sum > "$ms" &&
+        rm "$ms~" &&
+        chmod 644 "$ms"
+    )
 }
+
 
 # determing package type (archive, installation, neither, or both)
 pkgtype(){
@@ -402,6 +413,7 @@ pkgtype(){
         fi
     )
 }
+
 
 # prepare directory prior to build
 prep_build(){
