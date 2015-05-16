@@ -138,48 +138,53 @@ check_unpack_destination(){
 
 # download package(s) via apt-get then unpack
 combo(){
-    auto
+    enable_auto
+
+    local package
 
     for package in "$@"; do
         (
-            # wipe local variables
-            # local destination= fullpackage= output=
-
-            # sets $destination and $fullpackage
+            # sets $DESTINATION and $FULLPACKAGE
             findpackage "$package"
 
             # confirm apt-get was able to determing package destination filename
-            if [[ -z $destination || -z $fullpackage ]]; then
+            if [[ -z $DESTINATION || -z $FULLPACKAGE ]]; then
                 error "Failed to identify '$package' for download"
                 return 1
             fi
 
             # store output from apt-get to determine if a download occurred
 
-            # NOTE: We are using apt-get to download even if $destination already
-            #       exists because apt-get is intelligent and will only
+            # NOTE: We are using apt-get to download even if $DESTINATION file
+            #       already exists because apt-get is intelligent and will only
             #       re-download if neccesary (i.e. file checksum mismatch).
 
-            output=$(apt-get --quiet download "$fullpackage" 2>/dev/null)
+            output=$(apt-get --quiet download "$FULLPACKAGE" 2>/dev/null)
 
             # confirm apt-get exited successfully
             if (( $? != 0 )); then
                 error "apt-get experienced an error downloading '$package'"
                 check_internet || warning "No Internet connectivity"
-                return 1
+                return 100
             # confirm download exists
-            elif [[ ! -f $destination ]]; then
+            elif [[ ! -f $DESTINATION ]]; then
                 error "Failed to download '$package'"
                 return 1
             fi
 
             # unpack downloaded archive
             if [[ -n $output ]]; then
-                unpack "$destination"
+                unpack "$DESTINATION"
             else
-                echo "Skipping unpack of pre-existing archive '$destination'"
+                echo "Skipping unpack of pre-existing archive '$DESTINATION'"
             fi
         )
+
+    # exit if there was a connectivity error
+    if (( $? == 100 )); then
+        exit 1
+    fi
+
     done
 }
 
