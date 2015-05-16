@@ -42,7 +42,6 @@ build(){
         check_build_destination "$1" "$ARCHIVE"
 
         # build the archive
-        # fakeroot dpkg-deb --build "${1%/}" "$ARCHIVE"
         fakeroot dpkg-deb --build "$1" "$ARCHIVE"
 
         # check if build failed
