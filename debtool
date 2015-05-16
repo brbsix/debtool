@@ -65,64 +65,6 @@ build(){
     )
 }
 
-# # create a debian archive from a directory
-# build(){
-
-#     if [[ -d $1 ]]; then
-#         prep_build "$1"
-
-#         if [[ -n $2 ]]; then
-#             ARCHIVE=$2
-#         else
-
-#             # identify archive control file
-#             control=$1/DEBIAN/control
-
-#             # confirm existence of archive control
-#             if [[ ! -f $control || ! -r $control || ! -s $control ]]; then
-#                 error "'$1' is missing control file"
-#                 exit 1
-#             fi
-
-#             # determine archive name from contents of control file
-#             ARCHIVE=$(awk '/^Package: / { p=$2 }; /^Version: / { v=$2 }; /^Architecture: / { a=$2 }; END{ if ( length(a) > 0 ) { printf "%s_%s_%s.deb", p, v, a } else { printf "%s_%s.deb", p, v } }' "$control")
-
-#         fi
-
-#         check_build_destination "$1" "$ARCHIVE"
-
-#         # build the archive
-#         # fakeroot dpkg-deb --build "${1%/}" "$ARCHIVE"
-#         fakeroot dpkg-deb --build "$1" "$ARCHIVE"
-
-#         # check if build failed
-#         if (( $? != 0 )); then
-#             error "dpkg-deb exited with a nonzero exit code"
-#             restore_backup
-#             exit 1
-#         fi
-
-#         # check if archive was created and handle backup
-#         if [[ -f $ARCHIVE ]]; then
-#             remove_backup
-#         else
-#             restore_backup
-#             exit 1
-#         fi
-
-#         if (( REINSTALL == 1 )); then
-#             reinst "$ARCHIVE"
-#         fi
-#     else
-#         if [[ -n $1 ]]; then
-#             error "'$1' is not a directory"
-#         else
-#             error "You have not supplied a directory"
-#         fi
-#         exit 1
-#     fi
-
-# }
 
 # ensure build destination does not already exist
 check_build_destination(){
