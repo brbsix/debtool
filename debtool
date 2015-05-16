@@ -435,24 +435,35 @@ prep_build(){
             fi
         done < <(find -type f -regex '\./usr/share/man/.*' -name '*.[1-9]' ! -name '*.gz' -print0)
 
-        # update md5sums if necessary
-        if [[ -f DEBIAN/md5sums ]]; then
+        ms=DEBIAN/md5sums
 
-            # verify write access
-            if [[ ! -w DEBIAN/md5sums ]]; then
-                error "No write access to 'DEBIAN/md5sums'"
+        # create md5sums from scratch
+        if (( MD5SUMS == 1 )); then
+            md5sums_make || {
+                error "Failed to update '$ms'"
                 return 1
-            elif (( MD5 == 1 )) && ! md5sums_make; then
-                error "Failed to create DEBIAN/md5sums"
-                return 1
-            elif (( MD5 != 1 )) && ! md5sums_remake; then
-                error "Failed to update DEBIAN/md5sums"
-                return 1
-            elif ! md5sum --check --status DEBIAN/md5sums; then
-                error "DEBIAN/md5sums failed checksum verification"
-                return 1
+            }
+        # remake md5sums
+        else
+            # ensure original md5sums exists
+            if [[ ! -f $ms ]]; then
+                info "No pre-existing '$ms'"
+            # ensure original md5sums is writable
+            elif [[ ! -w $ms ]]; then
+                info "No write access to '$ms'"
+            # ensure remake of md5sums
+            else
+                md5sums_remake || {
+                    error "Failed to create '$ms'"
+                    return 1
+                }
             fi
+        fi
 
+        # verify md5sums if it exists
+        if [[ -f $ms ]] && ! md5sum --check --status "$ms"; then
+            error "'$ms' failed checksum verification"
+            return 1
         fi
     ) || exit 1
 }
