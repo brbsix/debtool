@@ -3,11 +3,6 @@
 # Simple tool to facilitate downloading and repacking debian archives
 
 
-# enable auto option
-auto(){
-    AUTO=1
-}
-
 # create a debian archive from a directory
 build(){
     (
@@ -406,11 +401,33 @@ download(){
         info "Successfully downloaded: ${successes[@]}"
     fi
 
-    if (( ${#failures[@]} > 0 )); then
-        error "Failed to download: ${failures[@]}"
-        check_internet || warning "No Internet connectivity"
-        return 1
-    fi
+# enable auto option
+enable_auto(){
+    AUTO=1
+}
+
+
+# enable format option
+enable_format(){
+    FORMAT=1
+}
+
+
+# enable option to create new md5sums
+enable_md5sums(){
+    MD5SUMS=1
+}
+
+
+# enable quiet option
+enable_quiet(){
+    QUIET='>/dev/null'
+}
+
+
+# enable reinstall option
+enable_reinstall(){
+    REINSTALL=1
 }
 
 error(){
@@ -418,9 +435,9 @@ error(){
 }
 
 fast(){
-    auto
-    quiet
-    REINSTALL=1
+    enable_auto
+    enable_quiet
+    enable_reinstall
 
     for dir in "$@"; do
         build "$dir"
@@ -842,7 +859,7 @@ eval set -- "$params"
 while true; do
     case "$1" in
         -a|--auto)
-            auto
+            enable_auto
             shift
             ;;
         -b|--build)
@@ -858,7 +875,7 @@ while true; do
             shift
             ;;
         -f|--format)
-            format
+            enable_format
             shift
             ;;
         -i|--interactive)
@@ -866,11 +883,11 @@ while true; do
             shift
             ;;
         -m|--md5sums)
-            md5
+            enable_md5sums
             shift
             ;;
         -q|--quiet)
-            quiet
+            enable_quiet
             shift
             ;;
         -r|--reinst)
@@ -916,8 +933,8 @@ elif (( ${#cmds[@]} == 1 )); then
 elif (( ${#cmds[@]} == 2 )) && [[ "${cmds[@]}" = *download* && "${cmds[@]}" = *unpack* ]]; then
     cmd='combo'
 elif (( ${#cmds[@]} == 2 )) && [[ "${cmds[@]}" = *build* && "${cmds[@]}" = *reinst* ]]; then
+    enable_reinstall
     cmd='build'
-    REINSTALL=1
 else
     error "Too many commands"
     exit 1
