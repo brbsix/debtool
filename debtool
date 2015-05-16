@@ -196,7 +196,7 @@ create_backup(){
     BACKUPDIR=$(mktemp --directory 2>/dev/null)
     if [[ ! -d $BACKUPDIR ]]; then
         error "Experienced unknown error while creating temporary directory"
-        echo "Please remove the pre-existing file and try again"
+        echo "Please remove the pre-existing file and try again" >&2
         exit 1
     fi
 
