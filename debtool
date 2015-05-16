@@ -312,10 +312,6 @@ findpackage(){
     rmdir "$tempdir" &>/dev/null
 }
 
-# enable format option
-format(){
-    FORMAT=1
-}
 
 info(){
     echo "$PROGRAM:INFO: $@"
