@@ -1,6 +1,8 @@
 # debtool
 
-debtool is a wrapper around several other utilities that aims to simplify the workflow for downloading, unpacking, and repacking debian packages. It is especially handy if you just want to incorporate quick bug fixes, fix or remove unwanted package requirements, etc without the trouble of downloading sources. You can even rebuild packages that are no longer available in the apt repositories (so long as you have them installed).
+debtool is a wrapper around several other utilities that aims to simplify the workflow for downloading, unpacking, repacking, and reinstalling Debian packages. It is especially handy if you just want to incorporate quick bug fixes, alter package requirements, et cetera without the trouble of building from sources. You can even rebuild packages that are no longer available from your apt repositories (so long as you have them installed).
+
+As with all of my programs, feel free to let me know if you have any feedback or encounter any issues.
 
 Installation
 ------------
@@ -13,14 +15,22 @@ To install debtool on Linux systems:
 Requirements
 ------------
 
-Ensure that the following packages are installed on your system.
+Ensure that the following packages are installed on your system:
 
-    apt
-    dpkg
     dpkg-repack
     fakeroot
 
-NOTE: `dpkg-repack` is only used to unpack installed packages. It is not necessary for any other actions.
+NOTE: `dpkg-repack` is only used to unpack installed packages.
+
+Other required packages that are most likely already installed on your system:
+
+    apt
+    awk
+    coreutils
+    dpkg
+    findutils
+    gzip
+    sed
 
 Usage
 -----
@@ -106,13 +116,12 @@ To show the versions and achitectures of packages available for download, format
 
     debtool --show --format PACKAGE
 
-Some mandatory options may be combined. Valid combinations include '--auto --download --unpack' (equivalent --combo), '--auto --build --reinst --quiet' (equivalent to --fast), and '--build --reinst'.
+Some mandatory options may be combined. Valid combinations include (but are not limited to) '--auto --download --unpack' (equivalent --combo), '--auto --build --reinst --quiet' (equivalent to --fast), and '--build --reinst'.
 
     debtool -du git mawk unar
-
     debtool -br DIRECTORY
 
-During normal build operations, `debtools` simply recalculates the existing md5sums. However if you add new files to the package you will want to use the md5sums option during build to create the md5sums from scratch.
+During normal build operations, `debtools` simply updates md5sums, using the pre-existing file as a template. However, if new files are added to the package (or if the md5sums file is missing) you will want to use the `--md5sums` option during build to generate md5sums from scratch.
 
     debtool --build --md5sums DIRECTORY
 
