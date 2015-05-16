@@ -89,38 +89,43 @@ check_build_destination(){
     fi
 }
 
-# check dependencies for prescribed command
+
+# check dependencies for prescribed function
 check_dependency(){
+
     (
         # store dependencies for each function
-        declare -A d
-        d['build']='awk dpkg fakeroot find gzip xargs'
-        d['combo']='apt awk dpkg'
-        d['download']='awk apt'
-        d['reinst']='dpkg'
-        d['show']='awk apt'
-        d['unpack']='awk dpkg'
-        d['unpack_installation']='dpkg-repack fakeroot sed'
+        declare -A dlist
+        dlist['build']='awk dpkg fakeroot find gzip xargs'
+        dlist['combo']='apt awk dpkg'  # show + unpack
+        dlist['download']='apt awk'
+        dlist['interactive']='apt awk'  # download + show
+        dlist['reinst']='dpkg'
+        dlist['show']='apt awk'
+        dlist['unpack']='awk dpkg'
+        dlist['unpack_installation']='dpkg-repack fakeroot sed'
 
         # get the dependencies for function $1
-        depends=${d["$1"]}
+        dependencies=(${dlist["$1"]})
 
         missing=()
-        for program in $depends; do
+        for program in "${dependencies[@]}"; do
             hash "$program" &>/dev/null || missing+=("$program")
         done
 
         if (( ${#missing[@]} > 0 )); then
-            echo "Please install the following program(s) before continuing: ${missing[@]}"
+            echo "Please install the following program(s) before continuing: ${missing[@]}" >&2
             return 1
         fi
     ) || exit 1
 }
 
+
 # check for Internet connectivity
 check_internet(){
     ping -c1 -W1 4.2.2.2 &>/dev/null || ping -c1 -W1 8.8.8.8 &>/dev/null
 }
+
 
 # ensure unpack destination does not already exist
 check_unpack_destination(){
