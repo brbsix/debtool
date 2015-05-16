@@ -277,15 +277,19 @@ error(){
     echo "$PROGRAM:ERROR: $@" >&2
 }
 
+
 fast(){
     enable_auto
     enable_quiet
     enable_reinstall
 
-    for dir in "$@"; do
-        build "$dir"
+    local directory
+
+    for directory in "$@"; do
+        build "$directory"
     done
 }
+
 
 # aquire the package destination filename
 findpackage(){
