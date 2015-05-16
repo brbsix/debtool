@@ -532,106 +532,97 @@ restore_backup(){
     fi
 }
 
+
 # show packages available for download
 show(){
+    (
+        # set the output format string
+        if (( FORMAT == 1 )); then
+            print_long='printf "apt-get download %s:%s=%s\n", p, a, v'
+            print_short='printf "apt-get download %s=%s\n", p, v'
+        else
+            print_long='print p, v, a'
+            print_short='print p, v'
+        fi
 
-    # set the output format string
-    if (( FORMAT == 1 )); then
-        local printFULL='printf "apt-get download %s:%s=%s\n", p, a, v'
-        local printBRIEF='printf "apt-get download %s=%s\n", p, v'
-    else
-        local printFULL='print p, v, a'
-        local printBRIEF='print p, v'
-    fi
+        set -o pipefail
 
-    # show each package details within a subshell (no need for local or unset)
-    for package in "$@"; do
-        (
-            set -o pipefail
+        for package in "$@"; do
 
             # parse APT's package cache for the package in question
-            apt-cache show "$package" 2>/dev/null | awk "/^Package: /{p=\$2} /^Version: /{v=\$2} /^Architecture/{a=\$2} /^$/{ if (a==\"all\") { $printBRIEF } else { $printFULL } }" || \
-            {
+            apt-cache show "$package" 2>/dev/null | awk "/^Package: /{p=\$2} /^Version: /{v=\$2} /^Architecture/{a=\$2} /^$/{ if (a==\"all\") { $print_short } else { $print_long } }" \
+            || {
                 error "apt-cache is unable to locate package '$package'"
-                return 1
+                false  # ensure exit status accurately reflects result of command
             }
-        )
-    done
+
+        done
+    )
 }
 
-# show_worker(){
-#     (
-#         set -o pipefail
-
-#         # parse APT's package cache for the package in question
-#         apt-cache show "$1" 2>/dev/null | awk "/^Package: /{p=\$2} /^Version: /{v=\$2} /^Architecture/{a=\$2} /^$/{ if (a==\"all\") { $printBRIEF } else { $printFULL } }" || \
-#         {
-#             error "apt-cache is unable to locate package '$1'"
-#             return 1
-#         }
-#     )
-# }
 
 # unpack a debian archive or installed package
 unpack(){
+    (
+        # determine package type (debian archive or installed) and exit if neither
+        pkgtype=$(pkgtype "$1") || return 1
 
-    # determine package type (debian archive or installed) and exit if neither
-    local pkgtype=$(pkgtype "$1") || return 1
+        if [[ $pkgtype = archive ]]; then
 
-    if [[ $pkgtype = archive ]]; then
+            if [[ -n $2 ]]; then
+                # set target to supplied argument
+                target=$2
+            else
+                # set target from parsed control file
+                target=$(dpkg-deb --field "$1" package version architecture | awk '{print $2}' | paste -sd_)
+            fi
 
-        if [[ -n $2 ]]; then
-            # set target to supplied argument
-            local target=$2
-        else
-            # set target from parsed control file
-            local target=$(dpkg-deb --field "$1" package version architecture | awk '{print $2}' | paste -sd_)
+            check_unpack_destination "$1" "$target"
+
+            # unpack archive
+            dpkg-deb --raw-extract "$1" "$target"
+
+        elif [[ $pkgtype = installation ]]; then
+
+            # perform additional dependency check
+            check_dependency unpack_installation
+
+            if [[ -n $2 ]]; then
+                # set target to supplied argument
+                target=$2
+            else
+                # set target to program's name
+                target=$1
+            fi
+
+            check_unpack_destination "$1" "$target"
+
+            # unpack into tmpfolder
+            tmpfolder=$(fakeroot -u dpkg-repack --generate "$1" 2>/dev/null | awk '{print $(NF-2)}')
+
+            # rename tmpfolder to target then clean up control file modified by dpkg-repack
+            mv "$tmpfolder" "$target" &>/dev/null \
+            && sed -i 's/ .$//;/ (Repackaged on .* by dpkg-repack.)/d' "$target/DEBIAN/control" &>/dev/null
         fi
 
-        check_unpack_destination "$1" "$target"
-
-        # unpack archive
-        dpkg-deb --raw-extract "$1" "$target"
-
-    elif [[ $pkgtype = installation ]]; then
-
-        # perform additional dependency check
-        check_dependency unpack_installation
-
-        if [[ -n $2 ]]; then
-            # set target to supplied argument
-            local target=$2
-        else
-            # set target to program's name
-            local target=$1
+        # check for target directory and exit now if missing
+        if [[ ! -d $target ]]; then
+            error "Failed to generate folder '$target' for '$1'"
+            return 1
         fi
 
-        check_unpack_destination "$1" "$target"
+        echo "Successfully unpacked $pkgtype to: $target"
 
-        # unpack into tmpfolder
-        local tmpfolder=$(fakeroot -u dpkg-repack --generate "$1" 2>/dev/null | awk '{print $(NF-2)}')
-
-        # rename tmpfolder to target then clean up control file modified by dpkg-repack
-        mv "$tmpfolder" "$target" &>/dev/null \
-        && sed -i 's/ .$//;/ (Repackaged on .* by dpkg-repack.)/d' "$target/DEBIAN/control" &>/dev/null
-    fi
-
-    # check for target directory and exit now if missing
-    if [[ ! -d $target ]]; then
-        error "Failed to generate folder '$target' for '$1'"
-        return 1
-    fi
-
-    echo "Successfully unpacked $pkgtype to: $target"
-
-    # prompt to delete archive
-    if [[ $pkgtype = archive ]] && (( AUTO != 1 )); then
-        read -p "Remove '$1'? "
-        if [[ ${REPLY,} = y* ]]; then
-            rm "$1"
+        # prompt to delete archive
+        if [[ $pkgtype = archive ]] && (( AUTO != 1 )); then
+            read -p "Remove '$1'? "
+            if [[ ${REPLY,} = y* ]]; then
+                rm "$1"
+            fi
         fi
-    fi
+    )
 }
+
 
 usage(){
     cat <<-EOF
@@ -662,6 +653,7 @@ usage(){
 	EOF
     exit 0
 }
+
 
 warning(){
     echo "$PROGRAM:WARNING: $@" >&2
