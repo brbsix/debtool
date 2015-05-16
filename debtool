@@ -468,54 +468,6 @@ prep_build(){
     ) || exit 1
 }
 
-# enable quiet option
-quiet(){
-    QUIET='>/dev/null'
-}
-
-# # reinstall package(s)
-# reinst(){
-
-#     local z
-
-#     for archive in "$@"; do
-
-#         # confirm archive is a file
-#         if [[ ! -f $ARCHIVE ]]; then
-#             error "'$ARCHIVE' does not appear to be a valid file"
-#             z=1
-#             continue
-#         fi
-
-#         # lookup package name in archive control file
-#         local package=$(dpkg-deb -f "$ARCHIVE" package 2>/dev/null)
-
-#         # confirm lookup of package name was successful
-#         if [[ -z $package ]]; then
-#             error "'$ARCHIVE' does not appear to be a valid debian archive"
-#             z=1
-#             continue
-#         fi
-
-#         # if sudo apt-get purge "$package" &>/dev/null; then
-#         if sudo dpkg --purge "$package" &>/dev/null; then
-#             echo "dpkg: purged '$package'"
-#         else
-#             echo "dpkg: failed to purge '$package' (perhaps it was not installed)"
-#         fi
-
-#         if sudo dpkg --install "$ARCHIVE" &>/dev/null; then
-#             echo "dpkg: installed '$package' ($ARCHIVE)"
-#             z=0
-#         else
-#             echo "dpkg: failed to install '$package' ($ARCHIVE)"
-#             z=1
-#         fi
-
-#     done
-
-#     return "$z"
-# }
 
 # reinstall package(s)
 reinst(){
