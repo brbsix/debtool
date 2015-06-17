@@ -36,7 +36,7 @@ _debtool(){
         -c|--combo|-d|--download|-i|--interactive|-s|--show)
 
             # include packages in apt-cache
-            COMPREPLY=( $( _xfunc dpkg apt-cache pkgnames "$cur" 2>/dev/null ) )
+            COMPREPLY=( $( _xfunc dpkg apt-cache --no-generate pkgnames "$cur" 2>/dev/null ) )
 
             return 0
             ;;
