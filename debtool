@@ -656,7 +656,7 @@ usage(){
 
 
 version(){
-    cat<<-EOF
+    cat <<-EOF
 	$PROGRAM $VERSION
 
 	Copyright (c) 2015 Six (brbsix@gmail.com)
