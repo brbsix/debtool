@@ -672,12 +672,8 @@ warning(){
 PROGRAM=${0##*/}
 VERSION='0.1.5'
 
-if (( $# == 1 )) && [[ $1 =~ ^(-h|--help|help)$ ]]; then
-    usage
-fi
-
-shopts='a,b,c,d,f,i,m,q,r,s,u,v,z'
-lopts='auto,build,combo,download,fast,format,interactive,md5sums,quiet,reinst,show,unpack,version'
+shopts='a,b,c,d,f,h,i,m,q,r,s,u,z'
+lopts='auto,build,combo,download,fast,format,help,interactive,md5sums,quiet,reinst,show,unpack'
 
 params=$(getopt -o "$shopts" -l "$lopts" -n "$PROGRAM" -- "$@") || exit 1
 
@@ -704,6 +700,9 @@ while true; do
         -f|--format)
             enable_format
             shift
+            ;;
+        -h|--help)
+            usage
             ;;
         -i|--interactive)
             cmds+=('interactive')
