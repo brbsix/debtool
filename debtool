@@ -385,7 +385,7 @@ md5sums_remake(){
         ms=DEBIAN/md5sums
 
         mv "$ms" "$ms~" &&
-        awk '{printf "%s\0", $2}' "$ms~" \
+        awk '{printf "%s%c", $2, 0}' "$ms~" \
         | xargs -0r md5sum > "$ms" &&
         rm "$ms~" &&
         chmod 644 "$ms"
