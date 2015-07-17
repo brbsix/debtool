@@ -138,7 +138,6 @@ check_unpack_destination(){
 
 # download package(s) via apt-get then unpack
 combo(){
-    enable_auto
 
     local package
 
@@ -279,9 +278,6 @@ error(){
 
 
 fast(){
-    enable_auto
-    enable_quiet
-    enable_reinstall
 
     local directory
 
@@ -750,6 +746,14 @@ elif (( $# == 0 )); then
     echo "$PROGRAM: missing operand" >&2
     echo "Try '$PROGRAM --help' for more information." >&2
     exit 1
+elif (( ${#cmds[@]} == 1 )) && [[ "${cmds[0]}" = fast ]]; then
+    enable_auto
+    enable_quiet
+    enable_reinstall
+    cmd='fast'
+elif (( ${#cmds[@]} == 1 )) && [[ "${cmds[0]}" = combo ]]; then
+    enable_auto
+    cmd='combo'
 elif (( ${#cmds[@]} == 1 )); then
     cmd=${cmds[0]}
 elif (( ${#cmds[@]} == 2 )) && [[ "${cmds[@]}" = *download* && "${cmds[@]}" = *unpack* ]]; then
