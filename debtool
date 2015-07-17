@@ -602,7 +602,7 @@ unpack(){
 
             # rename tmpfolder to target then clean up control file modified by dpkg-repack
             mv "$tmpfolder" "$target" &>/dev/null \
-            && sed -i 's/ .$//;/ (Repackaged on .* by dpkg-repack.)/d' "$target/DEBIAN/control" &>/dev/null
+            && perl -0777 -i -pe 's/ \.\n \(Repackaged on .* by dpkg-repack.\)//g' "$target/DEBIAN/control" &>/dev/null
         fi
 
         # check for target directory and exit now if missing
