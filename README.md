@@ -35,10 +35,10 @@ Other required packages that are most likely already installed on your system:
 Usage
 -----
 
-    Usage: debtool OPTION ARCHIVE|DIRECTORY|PACKAGEd [TARGET]
+    Usage: debtool [OPTIONS] COMMAND ARCHIVE|DIRECTORY|PACKAGE [TARGET]
     Manipulate Debian archives.
 
-    Mandatory Options
+    Commands:
       -b, --build           create a Debian archive from DIR
       -d, --download        download PKGS(s) via apt-get
       -i, --interactive     download PKG interactively (select specific version)
@@ -46,17 +46,17 @@ Usage
       -s, --show            show PKG(s) available for download
       -u, --unpack          unpack ARCHIVE or installed PKG into DIR
 
-    Combination Options
-      -c, --combo           download and unpack PKG(s) [-du]
-      -z, --fast            build and reinstall DIR(s) [-abr]
+    Combination Commands:
+      -c, --combo           download and unpack PKG(s) [-adu]
+      -z, --fast            build and reinstall DIR(s) [-abrq]
 
-    Miscellaneous Options
+    Miscellaneous Options:
       -a, --auto            skip prompts for user input
       -f, --format          format output of --show for manual download
-      -m, --md5sums         generate new md5sums (otherwise rebuild original)
+      -m, --md5sums         generate new md5sums (default is to rebuild original)
       -q, --quiet           suppress normal output
 
-    Some mandatory options may be combined. Combination options include '--auto --download --unpack' (equivalent --combo), '--auto --build --reinst --quiet' (equivalent to --fast), and '--build --reinst'.
+    Some commands may be combined. Valid combinations include (but are not limited to) '--auto --download --unpack' (equivalent to --combo), '--auto --build --reinst --quiet' (equivalent to --fast), and '--build --reinst'.
 
     NOTE: ARCHIVE refers to a '.deb' Debian archive. PKG refers to program available to download or an installed program to unpack.
 
@@ -116,7 +116,7 @@ To show the versions and achitectures of packages available for download, format
 
     debtool --show --format PACKAGE
 
-Some mandatory options may be combined. Valid combinations include (but are not limited to) '--auto --download --unpack' (equivalent --combo), '--auto --build --reinst --quiet' (equivalent to --fast), and '--build --reinst'.
+Some commands may be combined. Valid combinations include (but are not limited to) '--auto --download --unpack' (equivalent --combo), '--auto --build --reinst --quiet' (equivalent to --fast), and '--build --reinst'.
 
     debtool -du git mawk unar
     debtool -br DIRECTORY
