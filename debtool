@@ -92,13 +92,13 @@ check_build_destination(){
 
 # check dependencies for prescribed function
 check_dependency(){
-
     (
         # store dependencies for each function
         declare -A dlist
         dlist['build']='awk dpkg fakeroot find gzip xargs'
         dlist['combo']='apt awk dpkg'  # show + unpack
         dlist['download']='apt awk'
+        dlist['fast']=${dlist['build']}
         dlist['interactive']='apt awk'  # download + show
         dlist['reinst']='dpkg'
         dlist['show']='apt awk'
