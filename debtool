@@ -1050,7 +1050,7 @@ warning(){
 
 
 PROGRAM=${0##*/}
-VERSION='0.1.6'
+VERSION='0.2.0'
 
 shopts='a,b,c,d,f,h,i,m,q,r,s,u,z'
 lopts='auto,build,combo,download,fast,format,help,interactive,md5sums,quiet,reinst,repack,show,unpack'
