@@ -3,6 +3,11 @@
 # bash completion file for debtool
 
 
+# ensure bash-completion is installed
+if ! dpkg -s bash-completion 2>/dev/null | grep -Fq "Status: install ok installed"; then
+    return 0
+fi
+
 # ensure debtool is on the PATH
 _have debtool && {
 
