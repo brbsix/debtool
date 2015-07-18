@@ -15,12 +15,14 @@ To install `debtool` on Linux systems:
 Requirements
 ------------
 
-Ensure that the following packages are installed on your system:
+Ensure that the following package is installed on your system:
 
     fakeroot
-    perl
 
-NOTE: `perl` is only used to unpack or repack installed packages.
+It is recommended that you have the following installed on your system:
+
+    bash-complation
+    perl  # only necessary to unpack or repack installed packages
 
 Other required packages that are most likely already installed on your system:
 
