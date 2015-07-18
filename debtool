@@ -123,7 +123,15 @@ check_dependency(){
 
 # check for Internet connectivity
 check_internet(){
-    ping -c1 -W1 4.2.2.2 &>/dev/null || ping -c1 -W1 8.8.8.8 &>/dev/null
+    (
+        urls=(4.2.2.2 8.8.8.8 debian.org ubuntu.com)
+
+        for url in "${urls[@]}"; do
+            ping -c1 -W1 "$url" &>/dev/null && return 0
+        done
+
+        return 1
+    )
 }
 
 
