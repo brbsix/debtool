@@ -6,8 +6,8 @@
 # create a Debian archive from a directory
 build(){
     (
-        # NOTE: child functions inherit the parent's environment (to include local)...
-        #       consider declaring locals if they will only be used by subdirs
+        # NOTE: child functions inherit the parent's environment
+        #       (to include local variables)
 
         if [[ ! -d $1 ]]; then
             error "'$1' is not a directory"
