@@ -456,7 +456,7 @@ prep_build(){
         # create md5sums from scratch
         if (( MD5SUMS == 1 )); then
             md5sums_make || {
-                error "Failed to update '$ms'"
+                error "Failed to create '$ms'"
                 return 1
             }
         # remake md5sums
@@ -470,7 +470,7 @@ prep_build(){
             # ensure remake of md5sums
             else
                 md5sums_remake || {
-                    error "Failed to create '$ms'"
+                    error "Failed to remake '$ms'"
                     return 1
                 }
             fi
