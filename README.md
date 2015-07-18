@@ -17,10 +17,10 @@ Requirements
 
 Ensure that the following packages are installed on your system:
 
-    dpkg-repack
     fakeroot
+    perl
 
-NOTE: `dpkg-repack` is only used to unpack installed packages.
+NOTE: `perl` is only used to unpack or repack installed packages.
 
 Other required packages that are most likely already installed on your system:
 
@@ -30,7 +30,6 @@ Other required packages that are most likely already installed on your system:
     dpkg
     findutils
     gzip
-    sed
 
 Usage
 -----
@@ -43,6 +42,7 @@ Usage
       -d, --download        download PKGS(s) via apt-get
       -i, --interactive     download PKG interactively (select specific version)
       -r, --reinst          reinstall ARCHIVE(s)
+          --repack          create a Debian archive from installed PKG
       -s, --show            show PKG(s) available for download
       -u, --unpack          unpack ARCHIVE or installed PKG into DIR
 
@@ -60,6 +60,20 @@ Usage
 
     NOTE: ARCHIVE refers to a '.deb' Debian archive. PKG refers to program available to download or an installed program to unpack.
 
+Showing Packages
+-----------------
+
+To show the versions and architectures of packages available for download (e.g. `gawk 1:4.0.1+dfsg-2.1ubuntu2 amd64`):
+
+    debtool --show PACKAGE
+
+To show the versions and achitectures of packages available for download, formatted for manual installation (e.g. `apt-get download gawk:amd64=1:4.0.1+dfsg-2.1ubuntu2`):
+
+    debtool --show --format PACKAGE
+
+Downloading Packages
+---------------------
+
 To download a Debian package (from apt sources):
 
     debtool --download unar
@@ -76,9 +90,12 @@ You can even supply multiple package names at once if you'd like...
 
     debtool --download git mawk unar
 
-To download a package interactively and select among multiple versions:
+To download a package interactively and select from multiple versions:
 
     debtool --interactive git
+
+Unpacking Packages
+-------------------
 
 To unpack a Debian package:
 
@@ -88,15 +105,14 @@ To unpack to a particular directory:
 
     debtool --unpack unar_1.8.1-2_amd64.deb unar
 
-You can even unpack an already installed package. If you've modified installed files, these changes will be incorporated in the directory structure:
+You can even unpack an already installed package. If you've modified installed files, these changes will be incorporated into the directory structure:
 
     debtool --unpack mawk
 
-There is also a combo command to download and unpack at the same time:
+Rebuilding Packages
+--------------------
 
-    debtool --combo git mawk unar
-
-After you've made changes to the contents, you may rebuild the package. As part of the (re)build process, md5sums will be updated (if necessary) and any uncompressed manpages will be gzip'd. If you need to do much more than that, you should probably be using debhelper anyways.
+After you've made changes to the directory contents, you may rebuild the package. As part of the (re)build process, md5sums will be updated (if necessary) and any uncompressed manpages will be gzip'd. If you need to do much more than that, you should probably be using debhelper anyways.
 
     debtool --build DIRECTORY
 
@@ -104,30 +120,49 @@ You can specify a destination filename as follows if you'd like (otherwise the s
 
     debtool --build DIRECTORY package.deb
 
-After you've made changes, you can rapidly reinstall (purge then install) the indicated archive:
-
-    debtool --reinst ARCHIVE
-
-To show the versions and architectures of packages available for download (i.e. `gawk 1:4.0.1+dfsg-2.1ubuntu2 amd64`):
-
-    debtool --show PACKAGE
-
-To show the versions and achitectures of packages available for download, formatted for manual installation (i.e. `apt-get download gawk:amd64=1:4.0.1+dfsg-2.1ubuntu2`):
-
-    debtool --show --format PACKAGE
-
-Some commands may be combined. Valid combinations include (but are not limited to) '--auto --download --unpack' (equivalent --combo), '--auto --build --reinst --quiet' (equivalent to --fast), and '--build --reinst'.
-
-    debtool -du git mawk unar
-    debtool -br DIRECTORY
-
 During normal build operations, `debtool` simply updates md5sums, using the pre-existing file as a template. However, if new files are added to the package (or if the md5sums file is missing) you will want to use the `--md5sums` option during build to generate md5sums from scratch.
 
     debtool --build --md5sums DIRECTORY
 
+After you've made changes, you can rapidly reinstall (purge then install) the indicated archive:
+
+    debtool --reinst ARCHIVE
+
+Repack Installed Package
+------------------------
+
+You can even repack an already installed package. This is convenient when an installed package is no longer available for download. If you've modified installed files, these changes will be incorporated into the Debian archive:
+
+    debtool --repack mawk
+
+Combination Commands
+---------------------
+
+Some commands may be combined. Valid combinations include '--download --unpack' and '--build --reinst'.
+
+    debtool -du git mawk unar
+    debtool -br DIRECTORY
+
+Use the combo command (equivalent to `--auto --download --unpack`) to download and unpack at the same time:
+
+    debtool --combo git mawk unar
+
+Use the fast command (equivalent to `--auto --build --reinst --quiet`) to build and reinstall at the same time:
+
+    debtool --fast DIRECTORY
+
 License
 -------
 
-Copyright (c) 2015 Six (brbsix@gmail.com).
+Copyright (c) 2015 Six <brbsix@gmail.com>
 
 Licensed under the GPLv3 license.
+
+Additional Note
+---------------
+
+`debtool` uses a modified version of `dpkg-repack` to unpack and repack already installed packages.
+
+Copyright (c) 1996-2006 Joey Hess <joeyh@debian.org>
+
+Copyright (c) 2012, 2014-2015 Guillem Jover <guillem@debian.org>
