@@ -231,7 +231,7 @@ download(){
                     successes+=("$package")
                     continue 2
                 fi
-            done < <("$PROGRAM" --show --format "$package" 2>/dev/null | awk '{print $NF}')
+            done < <("$0" --show --format "$package" 2>/dev/null | awk '{print $NF}')
 
             # this point is only reachable upon failure
             failures+=("$package")
@@ -297,24 +297,36 @@ fast(){
 
 # aquire the package destination filename
 findpackage(){
-
-    # NOTE: apt-get will output nothing if package exists in the
-    #       current directory, hence the need to cd out if. This
-    #       is quite hackish but the alternative would be manually
-    #       parsing `apt-cache show "$package"`.
-
-    local tempdir=$(mktemp --directory 2>/dev/null)
-
     while IFS= read -r string; do
-        DESTINATION=$(cd "$tempdir" && apt-get --print-uris download "$string" 2>/dev/null | awk '{print $2}')
+        DESTINATION=$(apt-cache show "$string" | awk -F/ '/^Filename:/ {print $NF}')
         if [[ -n $DESTINATION ]]; then
             FULLPACKAGE=$string
             break
         fi
-    done < <("$PROGRAM" --show --format "$1" 2>/dev/null | awk '{print $NF}')
-
-    rmdir "$tempdir" &>/dev/null
+    done < <("$0" --show --format "$1" 2>/dev/null | awk '{print $NF}')
 }
+
+
+# # aquire the package destination filename
+# findpackage(){
+
+#     # NOTE: apt-get will output nothing if package exists in the current
+#     #       directory, hence the need to cd out if. This is quite hackish.
+#     #       Parsing output of `apt-cache show "$package"` may be a better
+#     #       approach.
+
+#     local tempdir=$(mktemp --directory 2>/dev/null)
+
+#     while IFS= read -r string; do
+#         DESTINATION=$(cd "$tempdir" && apt-get --print-uris download "$string" 2>/dev/null | awk '{print $2}')
+#         if [[ -n $DESTINATION ]]; then
+#             FULLPACKAGE=$string
+#             break
+#         fi
+#     done < <("$0" --show --format "$1" 2>/dev/null | awk '{print $NF}')
+
+#     rmdir "$tempdir" &>/dev/null
+# }
 
 
 info(){
@@ -329,7 +341,7 @@ interactive(){
 
     for program in "$@"; do
         (
-            readarray -t packages < <("$PROGRAM" --show --format "$program" | awk '{print $NF}')
+            readarray -t packages < <("$0" --show --format "$program" | awk '{print $NF}')
 
             (( ${#packages[@]} == 0 )) && return 1
 
@@ -345,7 +357,7 @@ interactive(){
                     return 1
                 fi
 
-                if "$PROGRAM" --download "$choice"; then
+                if "$0" --download "$choice"; then
                     return 0
                 fi
             done
