@@ -7,7 +7,12 @@ As with all of my programs, feel free to let me know if you have any feedback or
 Installation
 ------------
 
-To install `debtool` on Linux systems:
+To install `debtool` via Debian archive:
+
+    curl --remote-name -sL https://github.com/brbsix/debtool/raw/master/debtool_0.2.1_all.deb
+    sudo dpkg --install debtool_0.2.1_all.deb
+
+To install `debtool` from git repository:
 
     sudo install debtool /usr/local/bin
     sudo install -m 0644 debtool-completion /etc/bash_completion.d/debtool
