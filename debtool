@@ -46,7 +46,7 @@ Usage: dpkg-repack [option...] packagename...
 
 Options:
       --root=<dir>      Take package from filesystem rooted on <dir>.
-      --arch=<arch>     Force the parch to be built for architecture <arch>.
+      --arch=<arch>     Force the package to be built for architecture <arch>.
       --generate        Generate build directory but do not build deb.
   -d, --deb-option=<option>
                         Pass build <option> to dpkg-deb.
