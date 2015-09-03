@@ -463,7 +463,7 @@ check_dependency(){
         done
 
         if (( ${#missing[@]} > 0 )); then
-            echo "Please install the following program(s) before continuing: ${missing[@]}" >&2
+            error "Please install the following program(s) before continuing: ${missing[@]}"
             return 1
         fi
     ) || exit 1
@@ -861,13 +861,13 @@ reinst(){
             if sudo dpkg --purge "$package" &>/dev/null; then
                 echo "dpkg: purged '$package'"
             else
-                echo "dpkg: failed to purge '$package' (perhaps it was not installed)"
+                echo "dpkg: failed to purge '$package' (perhaps it was not installed)" >&2
             fi
 
             if sudo dpkg --install "$archive" &>/dev/null; then
                 echo "dpkg: installed '$package' ($archive)"
             else
-                echo "dpkg: failed to install '$package' ($archive)"
+                echo "dpkg: failed to install '$package' ($archive)" >&2
                 return 1
             fi
         )
