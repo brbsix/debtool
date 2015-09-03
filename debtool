@@ -824,7 +824,7 @@ prep_build(){
                 error "Failed to gzip '$manpage'"
                 return 1
             fi
-        done < <(find -type f -regex '\./usr/share/man/.*' -name '*.[1-9]' ! -name '*.gz' -print0)
+        done < <(find ./usr/share/man/ -type f -name '*.[1-9]' -print0 2>/dev/null)
 
         ms=DEBIAN/md5sums
 
