@@ -883,6 +883,12 @@ reinst(){
                 return 1
             fi
 
+            # check whether package is already installed
+            if [[ $(dpkg-query --show --showformat="\${Status}" "$package" 2>/dev/null) != 'install ok installed' ]]; then
+                warning "'$package' was not already installed"
+                echo "Consider running 'sudo apt-get install --fix-broken' to resolve missing dependencies" >&2
+            fi
+
             # if sudo apt-get purge "$package" &>/dev/null; then
             if sudo dpkg --purge "$package" &>/dev/null; then
                 echo "dpkg: purged '$package'"
