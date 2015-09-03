@@ -810,7 +810,10 @@ pkgtype(){
 prep_build(){
     (
         # enter directory
-        cd "$1"
+        cd "$1" || {
+            error "Failed to enter build directory '$1'"
+            return 1
+        }
 
         # prepare manpages (verify write access, set perms, compress)
         while IFS= read -rd $'\0' manpage; do
