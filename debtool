@@ -1018,7 +1018,7 @@ unpack(){
             check_unpack_destination "$1" "$target"
 
             # unpack into tmpfolder
-            tmpfolder=$(fakeroot -u perl -x "$0" --generate "$1" 2>/dev/null | awk '{print $(NF-2)}')
+            tmpfolder=$(dpkg-repack --generate "$1" 2>/dev/null | awk '{print $(NF-2)}')
 
             # rename tmpfolder to target
             mv "$tmpfolder" "$target" &>/dev/null
