@@ -901,13 +901,6 @@ reinst(){
                 echo "Consider running 'sudo apt-get install --fix-broken' to resolve missing dependencies" >&2
             fi
 
-            # if sudo apt-get purge "$package" &>/dev/null; then
-            if sudo dpkg --purge "$package" &>/dev/null; then
-                echo "dpkg: purged '$package'"
-            else
-                echo "dpkg: failed to purge '$package' (perhaps it was not installed)" >&2
-            fi
-
             if sudo dpkg --install "$archive" &>/dev/null; then
                 echo "dpkg: installed '$package' ($archive)"
             else
