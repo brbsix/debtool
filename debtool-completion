@@ -4,36 +4,52 @@
 
 
 # ensure bash-completion is installed
-if ! dpkg -s bash-completion 2>/dev/null | grep -q "^Status: install ok installed$"; then
-    return 0
-fi
+[[ $(dpkg-query --show --showformat="\${Status}" 'bash-completion' 2>/dev/null) != 'install ok installed' ]] && return 0
 
 # ensure debtool is on the PATH
 _have debtool && {
 
-_lsdebs(){
-    # include directories (except hidden ones)
-    compgen -d -X '?(*/).*' -- "$1"
+_contains(){
+    local arg option
 
-    # include files ending with .deb or .DEB
-    compgen -f -X '!*.@(deb|DEB)' -- "$1"
+    for arg in "$@"; do
+        for option in "${options[@]}"; do
+            if [[ $arg = "$option" ]]; then
+                return 0
+            fi
+        done
+    done
+
+    return 1
 }
 
 _debtool(){
-    local cur i special
+    local cmd cur lopts options params shopts
 
     COMPREPLY=()
     cur=${COMP_WORDS[COMP_CWORD]}
 
-    for (( i=0; i < ${#COMP_WORDS[@]}-1; i++ )); do
-        if [[ ${COMP_WORDS[i]} == @(-b|-br|--build|-c|--combo|-d|--download|--fast|-i|--interactive|-r|-rb|--reinst|--repack|-s|--show|-u|--unpack|-z) ]]; then
-            special=${COMP_WORDS[i]}
-        fi
-    done
+    if [[ $cur = -* ]]; then
+        # add completion for all of debtool's command line options
+        readarray -t COMPREPLY < \
+            <( compgen -W '-a --auto -b --build -c --combo -d --download
+                           -f --fast --format -h --help -i --interactive
+                           -m --md5sums -q --quiet -r --reinst --repack
+                           -s --show -u --unpack -z' -- "$cur" )
+        return 0
+    fi
 
-    if [[ -n $special ]]; then
-        case $special in
-            -b|-br|--build|--fast|-rb|-z)
+    # parse options (necessary to break up options like -brq)
+    shopts='a,b,c,d,f,h,i,m,q,r,s,u,z'
+    lopts='auto,build,combo,download,fast,format,help,interactive,md5sums,quiet,reinst,repack,show,unpack'
+    params=$(getopt -o "$shopts" -l "$lopts" -- "${COMP_WORDS[@]::${#COMP_WORDS[@]}-1}" 2>/dev/null)
+    eval options=("$params")
+
+    cmd=$(_getcmd)
+
+    if [[ -n $cmd ]]; then
+        case $cmd in
+            build)
 
                 # configure pathname completion
                 compopt -o filenames &>/dev/null
@@ -45,7 +61,7 @@ _debtool(){
                 return 0
                 ;;
 
-            -c|--combo|-d|--download|-i|--interactive|-s|--show)
+            download)
 
                 # include packages in apt-cache
                 readarray -t COMPREPLY < \
@@ -54,7 +70,7 @@ _debtool(){
                 return 0
                 ;;
 
-            -r|--reinst)
+            reinst)
 
                 # configure pathname completion
                 compopt -o filenames &>/dev/null
@@ -65,7 +81,7 @@ _debtool(){
                 return 0
                 ;;
 
-            --repack)
+            repack)
 
                 # include installed packages
                 readarray -t COMPREPLY < \
@@ -74,7 +90,7 @@ _debtool(){
                 return 0
                 ;;
 
-            -u|--unpack)
+            unpack)
 
                 # configure pathname completion
                 compopt -o filenames &>/dev/null
@@ -89,16 +105,29 @@ _debtool(){
         esac
     fi
 
-    if [[ $cur = -* ]]; then
-        # add completion for all of debtool's command line options
-        readarray -t COMPREPLY < \
-            <( compgen -W '-a --auto -b --build -c --combo -d --download
-                           -f --fast --format -h --help -i --interactive
-                           -m --md5sums -q --quiet -r --reinst --repack
-                           -s --show -u --unpack -z' -- "$cur" )
-    fi
-
     return 0
+}
+
+_getcmd(){
+    if _contains '-b' '--build' '--fast' '-z'; then
+        echo 'build'
+    elif _contains '-c' '--combo' '-d' '--download' '-i' '--interactive' '-s' '--show'; then
+        echo 'download'
+    elif _contains '-r' '--reinst'; then
+        echo 'reinst'
+    elif _contains '--repack'; then
+        echo 'repack'
+    elif _contains '-u' '--unpack'; then
+        echo 'unpack'
+    fi
+}
+
+_lsdebs(){
+    # include directories (except hidden ones)
+    compgen -d -X '?(*/).*' -- "$1"
+
+    # include files ending with .deb or .DEB
+    compgen -f -X '!*.@(deb|DEB)' -- "$1"
 }
 
 complete -F _debtool debtool
