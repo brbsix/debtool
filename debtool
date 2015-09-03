@@ -351,6 +351,7 @@ foreach my $packagename (@ARGV) {
 }
 __END__
 
+
 # create a Debian archive from a directory
 build(){
     (
@@ -1043,6 +1044,7 @@ version(){
 	EOF
     exit 0
 }
+
 
 warning(){
     echo "$PROGRAM:WARNING: $@" >&2
