@@ -915,21 +915,29 @@ remove_backup(){
     fi
 }
 
+
 # create a Debian archive from an installed package
 repack(){
-    local program
-
-    for program in "$@"; do
-        (
-            if fakeroot -u perl -x "$0" "$program" 2>/dev/null; then
-                echo "Successfully repacked $program"
+    (
+        for program in "$@"; do
+            if dpkg-repack "$program" &>/dev/null; then
+                successes+=("$program")
             else
-                error "Failed to repack $program"
-                return 1
+                failures+=("$program")
             fi
-        )
-    done
+        done
+
+        if (( ${#successes[@]} > 0 )); then
+            info "Successfully repacked: ${successes[@]}"
+        fi
+
+        if (( ${#failures[@]} > 0 )); then
+            error "Failed to repack: ${failures[@]}"
+            return 1
+        fi
+    )
 }
+
 
 # restore an archive backup (from a temp dir)
 restore_backup(){
