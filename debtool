@@ -859,6 +859,15 @@ prep_build(){
             error "'$ms' failed checksum verification"
             return 1
         fi
+
+        # update Installed-Size
+        newsize=$(du -k -s --apparent-size . 2>/dev/null | cut -f1)
+        if (( newsize > 0 )); then
+            sed -i "s/\(^Installed-Size:\) [0-9]\+/\1 $newsize/" DEBIAN/control || {
+                warning "Failed to update Installed-Size of ${PWD##*/}"
+            }
+        fi
+
     ) || exit 1
 }
 
