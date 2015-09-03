@@ -1030,7 +1030,7 @@ unpack(){
             return 1
         fi
 
-        echo "Successfully unpacked $pkgtype to: $target"
+        info "Successfully unpacked $pkgtype to: $target"
 
         # prompt to delete archive
         if [[ $pkgtype = archive ]] && (( AUTO != 1 )); then
