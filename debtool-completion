@@ -15,7 +15,7 @@ __debtool(){
     COMPREPLY=()
     cur=${COMP_WORDS[COMP_CWORD]}
 
-    if [[ $cur = -* ]]; then
+    if [[ $cur = -* || ( -z $cur && $COMP_CWORD -eq 1 ) ]]; then
         # add completion for all of debtool's command line options
         readarray -t COMPREPLY < \
             <( compgen -W '-a --auto -b --build -c --combo -d --download
