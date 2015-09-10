@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# bash completion file for debtool
+# bash completions for debtool
 
 
 # ensure bash-completion is installed
@@ -9,21 +9,7 @@
 # ensure debtool is on the PATH
 _have debtool && {
 
-_contains(){
-    local arg option
-
-    for arg in "$@"; do
-        for option in "${options[@]}"; do
-            if [[ $arg = "$option" ]]; then
-                return 0
-            fi
-        done
-    done
-
-    return 1
-}
-
-_debtool(){
+__debtool(){
     local cmd cur lopts options params shopts
 
     COMPREPLY=()
@@ -45,7 +31,7 @@ _debtool(){
     params=$(getopt -o "$shopts" -l "$lopts" -- "${COMP_WORDS[@]::${#COMP_WORDS[@]}-1}" 2>/dev/null)
     eval options=("$params")
 
-    cmd=$(_getcmd)
+    cmd=$(__debtool_getcmd)
 
     if [[ -n $cmd ]]; then
         case $cmd in
@@ -76,7 +62,7 @@ _debtool(){
                 compopt -o filenames &>/dev/null
 
                 # include directories and debian archives
-                readarray -t COMPREPLY < <( _lsdebs "$cur" )
+                readarray -t COMPREPLY < <( __debtool_lsdebs "$cur" )
 
                 return 0
                 ;;
@@ -97,7 +83,7 @@ _debtool(){
 
                 # include directories, debian archives, and installed packages
                 readarray -t COMPREPLY < \
-                    <( _lsdebs "$cur"
+                    <( __debtool_lsdebs "$cur"
                        _xfunc dpkg _comp_dpkg_installed_packages "$cur" 2>/dev/null )
 
                 return 0
@@ -108,21 +94,35 @@ _debtool(){
     return 0
 }
 
-_getcmd(){
-    if _contains '-b' '--build' '--fast' '-z'; then
+__debtool_contains(){
+    local arg option
+
+    for arg in "$@"; do
+        for option in "${options[@]}"; do
+            if [[ $arg = "$option" ]]; then
+                return 0
+            fi
+        done
+    done
+
+    return 1
+}
+
+__debtool_getcmd(){
+    if __debtool_contains '-b' '--build' '--fast' '-z'; then
         echo 'build'
-    elif _contains '-c' '--combo' '-d' '--download' '-i' '--interactive' '-s' '--show'; then
+    elif __debtool_contains '-c' '--combo' '-d' '--download' '-i' '--interactive' '-s' '--show'; then
         echo 'download'
-    elif _contains '-r' '--reinst'; then
+    elif __debtool_contains '-r' '--reinst'; then
         echo 'reinst'
-    elif _contains '--repack'; then
+    elif __debtool_contains '--repack'; then
         echo 'repack'
-    elif _contains '-u' '--unpack'; then
+    elif __debtool_contains '-u' '--unpack'; then
         echo 'unpack'
     fi
 }
 
-_lsdebs(){
+__debtool_lsdebs(){
     # include directories (except hidden ones)
     compgen -d -X '?(*/).*' -- "$1"
 
@@ -130,6 +130,6 @@ _lsdebs(){
     compgen -f -X '!*.@(deb|DEB)' -- "$1"
 }
 
-complete -F _debtool debtool
+complete -F __debtool debtool
 
 }
