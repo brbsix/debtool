@@ -518,20 +518,6 @@ combo(){
 
             output=$(apt-get --quiet download "$FULLPACKAGE" 2>/dev/null)
 
-            # # confirm apt-get exited successfully
-            # if (( $? != 0 )); then
-            #     error "apt-get experienced an error downloading '$package'"
-            #     check_internet || {
-            #         warning "No Internet connectivity"
-            #         return 100
-            #     }
-            #     return 1
-            # # confirm download exists
-            # elif [[ ! -f $DESTINATION ]]; then
-            #     error "Failed to download '$package'"
-            #     return 1
-            # fi
-
             # confirm apt-get exited successfully
             if (( $? != 0 )); then
                 error "apt-get experienced an error downloading '$package'"
