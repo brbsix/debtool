@@ -715,7 +715,7 @@ interactive(){
                     error "Invalid selection"
                     continue
                 elif [[ $choice = SKIP ]]; then
-                    return 1
+                    return 0
                 fi
 
                 if "$0" --download "$choice"; then
