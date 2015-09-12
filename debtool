@@ -718,9 +718,7 @@ interactive(){
                     return 0
                 fi
 
-                if "$0" --download "$choice"; then
-                    return 0
-                fi
+                "$0" --download "$choice" && return 0 || return 1
             done
         )
     done
