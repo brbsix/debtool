@@ -146,14 +146,15 @@ You can even repack an already installed package. This is convenient when an ins
 Combination Commands
 ---------------------
 
-Some commands may be combined. Valid combinations include '--download --unpack' and '--build --reinst'.
+Some commands may be combined. Valid combinations include '--download --unpack', `--interactive --unpack`, and '--build --reinst'.
 
     debtool -du git mawk unar
+    debtool -iu PACKAGES
     debtool -br DIRECTORY
 
 Use the combo command (equivalent to `--auto --download --unpack`) to download and unpack at the same time:
 
-    debtool --combo git mawk unar
+    debtool --combo PACKAGES
 
 Use the fast command (equivalent to `--auto --build --reinst --quiet`) to build and reinstall at the same time:
 

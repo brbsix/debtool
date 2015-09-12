@@ -518,8 +518,12 @@ combo(){
         (
             unset DESTINATION FULLPACKAGE
 
-            # sets $DESTINATION and $FULLPACKAGE
-            findpackage "$package"
+            # set $DESTINATION and $FULLPACKAGE
+            if (( INTERACTIVE == 1 )); then
+                querypackage "$package"
+            else
+                findpackage "$package"
+            fi
 
             # confirm apt-get was able to determing package destination filename
             if [[ -z $DESTINATION || -z $FULLPACKAGE ]]; then
@@ -639,6 +643,12 @@ enable_format(){
 }
 
 
+# enable interactive download option
+enable_interactive(){
+    INTERACTIVE=1
+}
+
+
 # enable option to create new md5sums
 enable_md5sums(){
     MD5SUMS=1
@@ -667,6 +677,30 @@ fast(){
 
     for directory in "$@"; do
         build "$directory"
+    done
+}
+
+
+# query user for package selection
+querypackage(){
+    readarray -t packages < <("$0" --show --format "$1" | awk '{print $NF}')
+
+    (( ${#packages[@]} == 0 )) && return 1
+
+    echo
+    echo "$1"
+    echo "----------"
+
+    select choice in "${packages[@]}" SKIP; do
+        if [[ -z $choice ]]; then
+            error "Invalid selection"
+            continue
+        elif [[ $choice = SKIP ]]; then
+            return 0
+        fi
+
+        echo "$choice"
+        return 0
     done
 }
 
@@ -717,24 +751,12 @@ interactive(){
 
     for program in "$@"; do
         (
-            readarray -t packages < <("$0" --show --format "$program" | awk '{print $NF}')
+            querypackage "$program"
 
-            (( ${#packages[@]} == 0 )) && return 1
+            # skip if necessary
+            [[ -z $FULLPACKAGE ]] && return 0
 
-            echo
-            echo "$program"
-            echo "----------"
-
-            select choice in "${packages[@]}" SKIP; do
-                if [[ -z $choice ]]; then
-                    error "Invalid selection"
-                    continue
-                elif [[ $choice = SKIP ]]; then
-                    return 0
-                fi
-
-                "$0" --download "$choice" && return 0 || return 1
-            done
+            "$0" --download "$FULLPACKAGE" && return 0 || return 1
         )
     done
 }
@@ -870,6 +892,40 @@ prep_build(){
         fi
 
     ) || exit 1
+}
+
+
+# query user for package selection
+querypackage(){
+
+    declare -Al packages
+    local choice destination
+
+    while IFS= read -r string; do
+        destination=$(apt-cache show "$string" | awk -F/ '/^Filename:/ {print $NF}')
+        if [[ -n $destination ]]; then
+            packages["$string"]=$destination
+        fi
+    done < <("$0" --show --format "$1" 2>/dev/null | awk '{print $NF}')
+
+    (( ${#packages[@]} == 0 )) && return 1
+
+    echo
+    echo "$1"
+    echo "----------"
+
+    select choice in "${!packages[@]}" SKIP; do
+        if [[ -z $choice ]]; then
+            error "Invalid selection"
+            continue
+        elif [[ $choice = SKIP ]]; then
+            return 0
+        fi
+
+        DESTINATION=${packages["$choice"]}
+        FULLPACKAGE=$choice
+        return 0
+    done
 }
 
 
@@ -1199,6 +1255,9 @@ elif (( ${#cmds[@]} == 1 )) && [[ "${cmds[0]}" = combo ]]; then
 elif (( ${#cmds[@]} == 1 )); then
     cmd=${cmds[0]}
 elif (( ${#cmds[@]} == 2 )) && [[ "${cmds[@]}" = *download* && "${cmds[@]}" = *unpack* ]]; then
+    cmd='combo'
+elif (( ${#cmds[@]} == 2 )) && [[ "${cmds[@]}" = *interactive* && "${cmds[@]}" = *unpack* ]]; then
+    enable_interactive
     cmd='combo'
 elif (( ${#cmds[@]} == 2 )) && [[ "${cmds[@]}" = *build* && "${cmds[@]}" = *reinst* ]]; then
     enable_reinstall
