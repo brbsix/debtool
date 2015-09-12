@@ -36,6 +36,7 @@ Other required packages that are most likely already installed on your system:
     coreutils
     dpkg
     findutils
+    grep
     gzip
 
 Usage
