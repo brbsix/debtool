@@ -358,6 +358,8 @@ build(){
         # NOTE: child functions inherit the parent's environment
         #       (to include local variables)
 
+        unset ARCHIVE BACKUPDIR BACKUPFILE
+
         if [[ ! -d $1 ]]; then
             error "'$1' is not a directory"
             exit 1
@@ -501,6 +503,8 @@ combo(){
 
     for package in "$@"; do
         (
+            unset DESTINATION FULLPACKAGE
+
             # sets $DESTINATION and $FULLPACKAGE
             findpackage "$package"
 
@@ -1084,6 +1088,12 @@ warning(){
 
 PROGRAM=${0##*/}
 VERSION='0.2.2'
+
+# clear option flags
+unset AUTO FORMAT INTERACTIVE MD5SUMS QUIET REINSTALL
+
+# clear other vars
+cmds=()
 
 shopts='a,b,c,d,f,h,i,m,q,r,s,u,z'
 lopts='auto,build,combo,download,fast,format,help,interactive,md5sums,quiet,reinst,repack,show,unpack'
