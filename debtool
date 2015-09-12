@@ -444,7 +444,7 @@ check_dependency(){
     (
         # store dependencies for each function
         declare -A dlist
-        dlist['build']='awk dpkg fakeroot find gzip xargs'
+        dlist['build']='awk dpkg fakeroot find grep gzip xargs'
         dlist['combo']='apt awk dpkg'  # show + unpack
         dlist['download']='apt awk'
         dlist['fast']=${dlist['build']}
@@ -845,11 +845,13 @@ prep_build(){
         fi
 
         # update Installed-Size
-        newsize=$(du -k -s --apparent-size . 2>/dev/null | cut -f1)
-        if (( newsize > 0 )); then
-            sed -i "s/\(^Installed-Size:\) [0-9]\+/\1 $newsize/" DEBIAN/control || {
-                warning "Failed to update Installed-Size of ${PWD##*/}"
-            }
+        if grep -q '^Installed-Size: [0-9]\+$' DEBIAN/control &>/dev/null; then
+            newsize=$(du -k -s --apparent-size . 2>/dev/null | cut -f1)
+            if (( newsize > 0 )); then
+                sed -i "s/\(^Installed-Size:\) [0-9]\+$/\1 $newsize/" DEBIAN/control || {
+                    warning "Failed to update Installed-Size of ${PWD##*/}"
+                }
+            fi
         fi
 
     ) || exit 1
