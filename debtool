@@ -763,44 +763,39 @@ interactive(){
 
 
 # make md5sums from scratch
-md5sums_make(){
+md5sums_helper(){
     (
         ms=DEBIAN/md5sums
 
         # backups existing md5sums
         mv "$ms" "$ms~" &>/dev/null
 
-        # create new md5sums
-        find -type f ! -path '*/DEBIAN/*' -printf '%P\0' | LC_ALL=C sort -z | xargs -0r -- md5sum > "$ms"
+        if (( $1 == 1 )); then
+            # create new md5sums from scratch
+            find -type f ! -path '*/DEBIAN/*' -printf '%P\0' | LC_ALL=C sort -z | xargs -0r -- md5sum > "$ms"
+        else
+            # remake md5sums using original as a template
+            awk '{printf "%s%c", $2, 0}' "$ms~" | xargs -0r md5sum > "$ms"
+        fi
 
-        # get file size of md5sums
-        size=$(stat --format=%s "$ms" 2>/dev/null)
-
-        # ensure file is not empty
-        [[ $size = 0 ]] && rm "$ms"
-
-        # check if md5sums was created
-        if [[ -f $ms ]]; then
+        # ensure md5sums is nonzero in size
+        if [[ -f $ms && -s $ms ]]; then
             rm "$ms~" &>/dev/null
             chmod 644 "$ms"
             return 0
-        else
-            return 1
         fi
-    )
-}
 
+        # this point is only reachable upon failure
 
-# remake md5sums using original as a template
-md5sums_remake(){
-    (
-        ms=DEBIAN/md5sums
+        # remove empty md5sums if it exists
+        if [[ -f $ms ]]; then
+            rm "$ms" &>/dev/null
+        fi
 
-        mv "$ms" "$ms~" &&
-        awk '{printf "%s%c", $2, 0}' "$ms~" \
-        | xargs -0r md5sum > "$ms" &&
-        rm "$ms~" &&
-        chmod 644 "$ms"
+        # restore from backup
+        mv "$ms~" "$ms" &>/dev/null
+
+        return 1
     )
 }
 
@@ -854,7 +849,7 @@ prep_build(){
 
         # create md5sums from scratch
         if (( MD5SUMS == 1 )); then
-            md5sums_make || {
+            md5sums_helper 1 || {
                 error "Failed to create '$ms'"
                 return 1
             }
@@ -868,7 +863,7 @@ prep_build(){
                 warning "No write access to '$ms'"
             # ensure remake of md5sums
             else
-                md5sums_remake || {
+                md5sums_helper 0 || {
                     error "Failed to remake '$ms'"
                     return 1
                 }
