@@ -473,6 +473,19 @@ check_dependency(){
 }
 
 
+# check whether download exists
+check_download_exists(){
+    if [[ ! -f $DESTINATION ]]; then
+        DESTINATION=$(find -type f -name "$(sed 's/_/_*/' <<<"$DESTINATION")" | head -n1)
+        if [[ ! -f $DESTINATION ]]; then
+            return 1
+        fi
+    fi
+
+    return 0
+}
+
+
 # check for Internet connectivity
 check_internet(){
     (
@@ -531,12 +544,9 @@ combo(){
                 }
                 return 1
             # confirm download exists
-            elif [[ ! -f $DESTINATION ]]; then
-                DESTINATION=$(find -type f -name "$(sed 's/_/_*/' <<<"$DESTINATION")" | head -n1)
-                if [[ ! -f $DESTINATION ]]; then
-                    error "Failed to download '$package'"
-                    return 1
-                fi
+            elif ! check_download_exists; then
+                error "Failed to download '$package'"
+                return 1
             fi
 
             if [[ -z $output ]]; then
