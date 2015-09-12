@@ -626,6 +626,7 @@ dpkg-repack(){
     fakeroot -u perl -x "$0" "$@"
 }
 
+
 # enable auto option
 enable_auto(){
     AUTO=1
