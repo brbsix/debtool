@@ -889,6 +889,7 @@ reinst(){
 
             if sudo dpkg --install "$archive" &>/dev/null; then
                 echo "dpkg: installed '$package' ($archive)"
+                return 0
             else
                 echo "dpkg: failed to install '$package' ($archive)" >&2
                 return 1
