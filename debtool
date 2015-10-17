@@ -869,23 +869,24 @@ prep_build(){
 # query user for package selection
 querypackage(){
 
-    declare -Al packages
-    local choice destination
+    declare -Al indexed_packages
+    local choice destination ordered_packages
 
     while IFS= read -r string; do
         destination=$(apt-cache show "$string" | awk -F/ '/^Filename:/ {print $NF}')
         if [[ -n $destination ]]; then
-            packages["$string"]=$destination
+            indexed_packages["$string"]=$destination
+            ordered_packages+=("$string")
         fi
     done < <("$0" --show --format "$1" 2>/dev/null | awk '{print $NF}')
 
-    (( ${#packages[@]} == 0 )) && return 1
+    (( ${#indexed_packages[@]} == 0 )) && return 1
 
     echo
     echo "$1"
     echo "----------"
 
-    select choice in "${!packages[@]}" SKIP; do
+    select choice in "${ordered_packages[@]}" SKIP; do
         if [[ -z $choice ]]; then
             error "Invalid selection"
             continue
@@ -893,7 +894,7 @@ querypackage(){
             return 0
         fi
 
-        DESTINATION=${packages["$choice"]}
+        DESTINATION=${indexed_packages["$choice"]}
         FULLPACKAGE=$choice
         return 0
     done
