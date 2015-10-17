@@ -681,30 +681,6 @@ fast(){
 }
 
 
-# query user for package selection
-querypackage(){
-    readarray -t packages < <("$0" --show --format "$1" | awk '{print $NF}')
-
-    (( ${#packages[@]} == 0 )) && return 1
-
-    echo
-    echo "$1"
-    echo "----------"
-
-    select choice in "${packages[@]}" SKIP; do
-        if [[ -z $choice ]]; then
-            error "Invalid selection"
-            continue
-        elif [[ $choice = SKIP ]]; then
-            return 0
-        fi
-
-        echo "$choice"
-        return 0
-    done
-}
-
-
 # aquire the package destination filename
 findpackage(){
     while IFS= read -r string; do
@@ -922,6 +898,30 @@ querypackage(){
         return 0
     done
 }
+
+
+# # query user for package selection
+# querypackage(){
+#     readarray -t packages < <("$0" --show --format "$1" | awk '{print $NF}')
+
+#     (( ${#packages[@]} == 0 )) && return 1
+
+#     echo
+#     echo "$1"
+#     echo "----------"
+
+#     select choice in "${packages[@]}" SKIP; do
+#         if [[ -z $choice ]]; then
+#             error "Invalid selection"
+#             continue
+#         elif [[ $choice = SKIP ]]; then
+#             return 0
+#         fi
+
+#         echo "$choice"
+#         return 0
+#     done
+# }
 
 
 # reinstall package(s)
