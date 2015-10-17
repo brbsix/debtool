@@ -1,0 +1,17 @@
+Source: debtool
+Section: utils
+Priority: optional
+Maintainer: Six <brbsix@gmail.com>
+Build-Depends: debhelper (>= 8.0.0)
+Standards-Version: 3.9.4
+Homepage: https://github.com/brbsix/debtool
+#Vcs-Git: git://github.com/brbsix/debtool.git
+#Vcs-Browser: https://github.com/brbsix/debtool
+
+Package: debtool
+Architecture: all
+Depends: fakeroot, ${misc:Depends}
+Recommends: bash-completion, perl
+Description: manipulate Debian archives
+ Simple tool to facilitate downloading and repacking Debian
+ archives.

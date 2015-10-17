@@ -1,0 +1,11 @@
+debtool (0.2.2) unstable; urgency=low
+
+  * Greatly improve bash completion. Update Installed-Size in control file.
+
+ -- Six <brbsix@gmail.com>  Thu, 03 Sep 2015 05:36:31 -0700
+
+debtool (0.2.1) unstable; urgency=low
+
+  * Initial Release.
+
+ -- Six <brbsix@gmail.com>  Sun, 12 Jul 2015 01:31:53 -0700

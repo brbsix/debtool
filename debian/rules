@@ -1,0 +1,16 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+
+# Uncomment this to turn on verbose mode.
+export DH_VERBOSE=1
+
+%:
+	dh $@
+
+override_dh_auto_install:
+	dh_auto_install
+	cp $(CURDIR)/debtool-completion $(CURDIR)/debian/debtool/etc/bash_completion.d/debtool
+	chmod -x $(CURDIR)/debian/debtool/etc/bash_completion.d/debtool
+
+override_dh_compress:
+	dh_compress -X README
