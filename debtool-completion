@@ -126,8 +126,8 @@ __debtool_lsdebs(){
     # include directories (except hidden ones)
     compgen -d -X '?(*/).*' -- "$1"
 
-    # include files ending with .deb or .DEB
-    compgen -f -X '!*.@(deb|DEB)' -- "$1"
+    # include files ending with .deb, .DEB, .udeb, .UDEB
+    compgen -f -X '!*.@(deb|DEB|udeb|UDEB)' -- "$1"
 }
 
 complete -F __debtool debtool
