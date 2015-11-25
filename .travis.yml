@@ -1,4 +1,9 @@
 language:
   - bash  # bash maps to generic
+
+before_install:
+  - sudo apt-get update -qq
+  - sudo apt-get install -y bc
+
 script:
   - bash tests/debtool-test.sh
