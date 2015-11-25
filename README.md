@@ -26,7 +26,7 @@ Ensure that the following package is installed on your system:
 
 It is recommended that you have the following installed on your system:
 
-    bash-complation
+    bash-completion
     perl  # only necessary to unpack or repack installed packages
 
 Other required packages that are most likely already installed on your system:
