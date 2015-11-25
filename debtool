@@ -1158,8 +1158,8 @@ unset AUTO FORMAT INTERACTIVE MD5SUMS QUIET REINSTALL
 # clear other vars
 cmds=()
 
-shopts='a,b,c,d,f,h,i,m,q,r,s,u,z'
-lopts='auto,build,combo,download,fast,format,help,interactive,md5sums,quiet,reinst,repack,show,unpack'
+shopts='a,b,c,d,f,h,i,m,q,r,s,u,v,z'
+lopts='auto,build,combo,download,fast,format,help,interactive,md5sums,quiet,reinst,repack,show,unpack,version'
 
 params=$(getopt -o "$shopts" -l "$lopts" -n "$PROGRAM" -- "$@") || exit 1
 
