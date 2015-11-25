@@ -1,0 +1,4 @@
+language:
+  - bash  # bash maps to generic
+script:
+  - bash tests/debtool-test.sh
