@@ -1,6 +1,6 @@
 # debtool
 
-`debtool` is a wrapper around several other utilities that aims to simplify the workflow for downloading, unpacking, repacking, and reinstalling Debian packages. It is especially handy if you want to download .deb files, incorporate quick bug fixes, alter package requirements, et cetera without the trouble of building from sources. You can even rebuild packages that are no longer available from your apt repositories (so long as you have them installed).
+`debtool` is a wrapper around several other utilities that aims to simplify the workflow for downloading, unpacking, repacking, and reinstalling Debian packages. It is especially handy if you want to download *.deb* files, incorporate quick bug fixes, alter package requirements, et cetera without the trouble of building from sources. You can even rebuild packages that are no longer available from your apt repositories (so long as you have them installed).
 
 As with all of my programs, feel free to let me know if you have any feedback or encounter any issues.
 
