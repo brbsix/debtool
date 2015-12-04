@@ -19,6 +19,7 @@ error(){
     echo "ERROR: $*" >&2
 }
 
+# Test for the existence of command line options
 existential_test(){
     local ec option
 
