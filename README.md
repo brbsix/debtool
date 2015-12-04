@@ -9,8 +9,8 @@ Installation
 
 To install `debtool` via Debian archive:
 
-    curl --remote-name -sL https://github.com/brbsix/debtool/releases/download/v0.2.3/debtool_0.2.3_all.deb
-    sudo dpkg --install debtool_0.2.3_all.deb
+    curl --remote-name -sL https://github.com/brbsix/debtool/releases/download/v0.2.4/debtool_0.2.4_all.deb
+    sudo dpkg --install debtool_0.2.4_all.deb
 
 To install `debtool` from git repository:
 

@@ -1150,7 +1150,7 @@ warning(){
 
 
 PROGRAM=${0##*/}
-VERSION='0.2.3'
+VERSION='0.2.4'
 
 # clear option flags
 unset AUTO FORMAT INTERACTIVE MD5SUMS QUIET REINSTALL
