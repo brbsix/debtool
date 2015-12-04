@@ -149,7 +149,7 @@ _test_debtool_version_exists(){
     if [[ -n $VERSION ]]; then
         pass_test
     else
-        fail_test 'Failed to identify version.'
+        fail_test 'Failed to identify version'
     fi
 }
 
