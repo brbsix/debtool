@@ -1250,6 +1250,10 @@ elif (( ${#cmds[@]} == 1 )) && [[ "${cmds[0]}" = combo ]]; then
     cmd='combo'
 elif (( ${#cmds[@]} == 1 )); then
     cmd=${cmds[0]}
+elif (( ${#cmds[@]} == 2 )) && [[ "${cmds[@]}" = *download* && "${cmds[@]}" = *interactive* ]]; then
+    # note that 'download' has no effect when combined with 'interactive'
+    # but it is still considered a valid command
+    cmd='interactive'
 elif (( ${#cmds[@]} == 2 )) && [[ "${cmds[@]}" = *download* && "${cmds[@]}" = *unpack* ]]; then
     cmd='combo'
 elif (( ${#cmds[@]} == 2 )) && [[ "${cmds[@]}" = *interactive* && "${cmds[@]}" = *unpack* ]]; then
@@ -1258,6 +1262,11 @@ elif (( ${#cmds[@]} == 2 )) && [[ "${cmds[@]}" = *interactive* && "${cmds[@]}" =
 elif (( ${#cmds[@]} == 2 )) && [[ "${cmds[@]}" = *build* && "${cmds[@]}" = *reinst* ]]; then
     enable_reinstall
     cmd='build'
+elif (( ${#cmds[@]} == 3 )) && [[ "${cmds[@]}" = *download* && "${cmds[@]}" = *interactive* && "${cmds[@]}" = *unpack* ]]; then
+    # note that 'download' has no effect when combined with 'interactive'
+    # and 'unpack' but it is still considered a valid command
+    enable_interactive
+    cmd='combo'
 else
     error "Too many commands"
     exit 1
