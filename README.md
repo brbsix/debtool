@@ -164,7 +164,7 @@ To create a new release:
 3. Build the *.deb* with `make deb` and update the changelog when prompted
 4. Commit the changes (excluding the *.deb* package)
 5. Tag the release (e.g. `git tag v0.0.1`)
-6. Push the release (e.g. `git push origin v0.0.1` or `git push origin --tags`)
+6. Push the release (e.g. `git push origin master v0.0.1` or `git push origin master --tags`)
 7. Attach the *.deb* package to the release via GitHub's web interface (this keeps builds out of the repo history)
 
 ## License
