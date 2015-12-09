@@ -1,3 +1,9 @@
+debtool (0.2.5) unstable; urgency=low
+
+  * Ensure -di and -diu are valid command combinations.
+
+ -- Six <brbsix@gmail.com>  Wed, 09 Dec 2015 08:12:29 -0800
+
 debtool (0.2.4) unstable; urgency=low
 
   * Fix broken -v/--version options.
