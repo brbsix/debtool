@@ -570,6 +570,12 @@ combo(){
 }
 
 
+# test whether args are equivalent to CMDS
+commands(){
+    [[ $(printf '%s\n' "${CMDS[@]}" | LC_ALL=C sort) = $(printf '%s\n' "$@" | LC_ALL=C sort) ]]
+}
+
+
 # backup a pre-existing archive (into a temp dir)
 create_backup(){
 
@@ -1156,7 +1162,7 @@ VERSION='0.2.4'
 unset AUTO FORMAT INTERACTIVE MD5SUMS QUIET REINSTALL
 
 # clear other vars
-cmds=()
+CMDS=()
 
 shopts='a,b,c,d,f,h,i,m,q,r,s,u,v,z'
 lopts='auto,build,combo,download,fast,format,help,interactive,md5sums,quiet,reinst,repack,show,unpack,version'
@@ -1172,15 +1178,15 @@ while true; do
             shift
             ;;
         -b|--build)
-            cmds+=('build')
+            CMDS+=('build')
             shift
             ;;
         -c|--combo)
-            cmds+=('combo')
+            CMDS+=('combo')
             shift
             ;;
         -d|--download)
-            cmds+=('download')
+            CMDS+=('download')
             shift
             ;;
         -f|--format)
@@ -1191,7 +1197,7 @@ while true; do
             usage
             ;;
         -i|--interactive)
-            cmds+=('interactive')
+            CMDS+=('interactive')
             shift
             ;;
         -m|--md5sums)
@@ -1203,26 +1209,26 @@ while true; do
             shift
             ;;
         -r|--reinst)
-            cmds+=('reinst')
+            CMDS+=('reinst')
             shift
             ;;
         --repack)
-            cmds+=('repack')
+            CMDS+=('repack')
             shift
             ;;
         -s|--show)
-            cmds+=('show')
+            CMDS+=('show')
             shift
             ;;
         -u|--unpack)
-            cmds+=('unpack')
+            CMDS+=('unpack')
             shift
             ;;
         -v|--version)
             version
             ;;
         -z|--fast)
-            cmds+=('fast')
+            CMDS+=('fast')
             shift
             ;;
         --)
@@ -1232,7 +1238,7 @@ while true; do
     esac
 done
 
-if (( ${#cmds[@]} == 0 )); then
+if (( ${#CMDS[@]} == 0 )); then
     echo "$PROGRAM: missing mandatory option" >&2
     echo "Try '$PROGRAM --help' for more information." >&2
     exit 1
@@ -1240,33 +1246,30 @@ elif (( $# == 0 )); then
     echo "$PROGRAM: missing operand" >&2
     echo "Try '$PROGRAM --help' for more information." >&2
     exit 1
-elif (( ${#cmds[@]} == 1 )) && [[ "${cmds[0]}" = fast ]]; then
+elif commands fast; then
     enable_auto
     enable_quiet
     enable_reinstall
     cmd='fast'
-elif (( ${#cmds[@]} == 1 )) && [[ "${cmds[0]}" = combo ]]; then
+elif commands combo; then
     enable_auto
     cmd='combo'
-elif (( ${#cmds[@]} == 1 )); then
-    cmd=${cmds[0]}
-elif (( ${#cmds[@]} == 2 )) && [[ "${cmds[@]}" = *download* && "${cmds[@]}" = *interactive* ]]; then
+elif (( ${#CMDS[@]} == 1 )); then
+    cmd=${CMDS[0]}
+elif commands download interactive; then
     # note that 'download' has no effect when combined with 'interactive'
     # but it is still considered a valid command
     cmd='interactive'
-elif (( ${#cmds[@]} == 2 )) && [[ "${cmds[@]}" = *download* && "${cmds[@]}" = *unpack* ]]; then
+elif commands download unpack; then
     cmd='combo'
-elif (( ${#cmds[@]} == 2 )) && [[ "${cmds[@]}" = *interactive* && "${cmds[@]}" = *unpack* ]]; then
-    enable_interactive
-    cmd='combo'
-elif (( ${#cmds[@]} == 2 )) && [[ "${cmds[@]}" = *build* && "${cmds[@]}" = *reinst* ]]; then
-    enable_reinstall
-    cmd='build'
-elif (( ${#cmds[@]} == 3 )) && [[ "${cmds[@]}" = *download* && "${cmds[@]}" = *interactive* && "${cmds[@]}" = *unpack* ]]; then
+elif commands interactive unpack || commands download interactive unpack; then
     # note that 'download' has no effect when combined with 'interactive'
     # and 'unpack' but it is still considered a valid command
     enable_interactive
     cmd='combo'
+elif commands build reinst; then
+    enable_reinstall
+    cmd='build'
 else
     error "Too many commands"
     exit 1
