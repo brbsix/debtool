@@ -4,8 +4,7 @@
 
 As with all of my programs, feel free to let me know if you have any feedback or encounter any issues.
 
-Installation
-------------
+## Installation
 
 To install `debtool` via Debian archive:
 
@@ -17,8 +16,7 @@ To install `debtool` from git repository:
     sudo install debtool /usr/local/bin
     sudo install -m 0644 debtool-completion /etc/bash_completion.d/debtool
 
-Requirements
-------------
+## Requirements
 
 Ensure that the following package is installed on your system:
 
@@ -39,8 +37,7 @@ Other required packages that are most likely already installed on your system:
     grep
     gzip
 
-Usage
------
+## Usage
 
     Usage: debtool [OPTIONS] COMMAND ARCHIVE|DIRECTORY|PACKAGE [TARGET]
     Manipulate Debian archives.
@@ -68,8 +65,7 @@ Usage
 
     NOTE: ARCHIVE refers to a '.deb' Debian archive. PKG refers to program available to download or an installed program to unpack.
 
-Showing Packages
------------------
+### Showing Packages
 
 To show the versions and architectures of packages available for download (e.g. `gawk 1:4.0.1+dfsg-2.1ubuntu2 amd64`):
 
@@ -79,8 +75,7 @@ To show the versions and achitectures of packages available for download, format
 
     debtool --show --format PACKAGE
 
-Downloading Packages
----------------------
+### Downloading Packages
 
 To download a Debian package (from apt sources):
 
@@ -102,8 +97,7 @@ To download a package interactively and select from multiple versions:
 
     debtool --interactive git
 
-Unpacking Packages
--------------------
+### Unpacking Packages
 
 To unpack a Debian package:
 
@@ -117,8 +111,7 @@ You can even unpack an already installed package. If you've modified installed f
 
     debtool --unpack mawk
 
-Rebuilding Packages
---------------------
+### Rebuilding Packages
 
 After you've made changes to the directory contents, you may rebuild the package. As part of the (re)build process, md5sums will be updated (if necessary) and any uncompressed manpages will be gzip'd. If you need to do much more than that, you should probably be using debhelper anyways.
 
@@ -136,15 +129,13 @@ After you've made changes, you can rapidly reinstall (purge then install) the in
 
     debtool --reinst ARCHIVE
 
-Repack Installed Package
-------------------------
+### Repack Installed Package
 
 You can even repack an already installed package. This is convenient when an installed package is no longer available for download. If you've modified installed files, these changes will be incorporated into the Debian archive:
 
     debtool --repack mawk
 
-Combination Commands
----------------------
+### Combination Commands
 
 Some commands may be combined. Valid combinations include '--download --unpack', `--interactive --unpack`, and '--build --reinst'.
 
@@ -160,15 +151,13 @@ Use the fast command (equivalent to `--auto --build --reinst --quiet`) to build 
 
     debtool --fast DIRECTORY
 
-License
--------
+## License
 
 Copyright (c) 2015 Six <brbsix@gmail.com>
 
 Licensed under the GPLv3 license.
 
-Additional Note
----------------
+## Additional Notes
 
 `debtool` uses a modified version of `dpkg-repack` to unpack and repack already installed packages.
 
