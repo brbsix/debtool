@@ -151,6 +151,22 @@ Use the fast command (equivalent to `--auto --build --reinst --quiet`) to build 
 
     debtool --fast DIRECTORY
 
+## Development
+
+To run tests (note that [Travis CI](https://travis-ci.org/brbsix/debtool) runs tests upon push):
+
+`make test`
+
+To create a new release:
+
+1. Bump VERSION in `debtool`
+2. Edit the download instructions in README.md to reflect the new version
+3. Build the *.deb* with `make deb` and update the changelog when prompted
+4. Commit the changes (excluding the *.deb* package)
+5. Tag the release (e.g. `git tag v0.0.1`)
+6. Push the release (e.g. `git push origin v0.0.1` or `git push origin --tags`)
+7. Attach the *.deb* package to the release via GitHub's web interface (this keeps builds out of the repo history)
+
 ## License
 
 Copyright (c) 2015 Six <brbsix@gmail.com>
