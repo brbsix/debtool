@@ -49,4 +49,4 @@ cd "$BUILD_DIRECTORY" || {
 debuild -b -uc -us
 
 # remove temporary build directory
-rm -rf "$BUILD_DIRECTORY"
+rm -rf "../$BUILD_DIRECTORY"
