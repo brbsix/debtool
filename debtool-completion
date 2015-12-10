@@ -51,7 +51,7 @@ __debtool(){
 
                 # include packages in apt-cache
                 readarray -t COMPREPLY < \
-                    <( apt-cache --no-generate pkgnames "$cur" 2>/dev/null )
+                    <( apt-cache --no-generate pkgnames -- "$cur" 2>/dev/null )
 
                 return 0
                 ;;
