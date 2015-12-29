@@ -362,7 +362,7 @@ build(){
 
         if [[ ! -d $1 ]]; then
             error "'$1' is not a directory"
-            exit 1
+            return 1
         fi
 
         prep_build "$1"
@@ -377,7 +377,7 @@ build(){
             # verify control file (regular file, readable, nonzero size)
             if [[ ! -f $control || ! -r $control || ! -s $control ]]; then
                 error "Missing or invalid control file '$control'"
-                exit 1
+                return 1
             fi
 
             # determine archive name from contents of control file
@@ -386,7 +386,7 @@ build(){
             # verify control file was parsed
             if [[ -z $ARCHIVE ]]; then
                 error "Unparsable control file '$control'"
-                exit 1
+                return 1
             fi
         fi
 
@@ -399,7 +399,7 @@ build(){
         if (( $? != 0 )); then
             error "dpkg-deb exited with a nonzero exit code"
             restore_backup
-            exit 1
+            return 1
         fi
 
         # check if archive was created and handle backup
@@ -407,7 +407,7 @@ build(){
             remove_backup
         else
             restore_backup
-            exit 1
+            return 1
         fi
 
         if (( REINSTALL == 1 )); then
