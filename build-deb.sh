@@ -79,9 +79,11 @@ cd "$BUILD_DIRECTORY" || {
 # perform build
 debuild -b -uc -us
 
+EC=$?
+
 # warn upon debuild failure
-if (( $? != 0 )); then
-    warning "debuild returned a nonzero exit code"
+if (( EC != 0 )); then
+    warning "debuild returned a nonzero exit code [$EC]"
 fi
 
 # enter the temp directory containing .deb and logs
