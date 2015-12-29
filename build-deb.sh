@@ -58,14 +58,6 @@ if [[ -d $TEMP_DIRECTORY ]]; then
     error "Temporary directory '$TEMP_DIRECTORY' already exists... Remove it before continuing."
 fi
 
-# update changelog
-dch --controlmaint --distribution unstable --newversion "$VERSION" --urgency low
-
-# exit upon debchange error
-if (( $? != 0 )); then
-    error "debchange experienced an unknown error"
-fi
-
 # create temp directory and build directory
 mkdir -p "$BUILD_DIRECTORY" || {
     error "Failed to create $BUILD_DIRECTORY"

@@ -157,12 +157,11 @@ To run tests (note that [Travis CI](https://travis-ci.org/brbsix/debtool) runs t
 
 `make test`
 
-To create a new release:
+To create a new release, ensure you have **devscripts** installed then run the following:
 
-1. Bump VERSION in `debtool`
-2. Edit the download instructions in README.md to reflect the new version
-3. Build the *.deb* with `make deb` and update the changelog when prompted
-4. Commit the changes (excluding the *.deb* package)
+1. Bump version and increment changelog with `./bump-version.sh`
+2. Commit the changes
+3. Build the *.deb* with `make deb`
 5. Tag the release (e.g. `git tag v0.0.1`)
 6. Push the release (e.g. `git push origin master v0.0.1` or `git push origin master --tags`)
 7. Attach the *.deb* package to the release via GitHub's web interface (this keeps builds out of the repo history)
