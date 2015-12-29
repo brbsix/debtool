@@ -395,9 +395,11 @@ build(){
         # build the archive
         fakeroot dpkg-deb --build "$1" "$ARCHIVE"
 
+        ec=$?
+
         # check if build failed
-        if (( $? != 0 )); then
-            error "dpkg-deb exited with a nonzero exit code"
+        if (( ec != 0 )); then
+            error "dpkg-deb returned a nonzero exit code [$ec]"
             restore_backup
             return 1
         fi
