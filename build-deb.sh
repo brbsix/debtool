@@ -17,7 +17,7 @@ warning(){
 PROGRAM=${0##*/}
 
 APPLICATION=debtool
-SCRIPT_DIRECTORY=$(realpath "$(dirname "$0")")
+SCRIPT_DIRECTORY=$(readlink -m "$(dirname "$0")")
 TEMP_DIRECTORY=$SCRIPT_DIRECTORY/temp_dir
 BUILD_DIRECTORY=$TEMP_DIRECTORY/build_dir
 BUILD_PATHS=(debian "$APPLICATION" "${APPLICATION}-completion" README.md)
