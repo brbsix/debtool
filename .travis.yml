@@ -7,4 +7,5 @@ addons:
     - bc
 
 script:
+  - make deb
   - make test
