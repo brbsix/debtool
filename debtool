@@ -497,6 +497,8 @@ check_internet(){
             ping -c1 -W1 "$url" &>/dev/null && return 0
         done
 
+        warning 'No Internet connectivity'
+
         return 1
     )
 }
@@ -544,10 +546,7 @@ combo(){
             # confirm apt-get exited successfully
             if (( $? != 0 )); then
                 error "apt-get experienced an error downloading '$package'"
-                check_internet || {
-                    warning 'No Internet connectivity'
-                    return 100
-                }
+                check_internet || return 100
                 return 1
             # confirm download exists
             elif ! check_download_exists; then
@@ -626,7 +625,7 @@ download(){
 
         if (( ${#failures[@]} > 0 )); then
             error "Failed to download: ${failures[*]}"
-            check_internet || warning 'No Internet connectivity'
+            check_internet
             return 1
         fi
     )
