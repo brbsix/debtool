@@ -1037,8 +1037,7 @@ show(){
         for package in "$@"; do
 
             # parse APT's package cache for the package in question
-            apt-cache show "$package" 2>/dev/null | awk "/^Package: /{p=\$2} /^Version: /{v=\$2} /^Architecture/{a=\$2} /^$/{ if (a==\"all\") { $print_short } else { $print_long } }" \
-            || {
+            apt-cache show "$package" 2>/dev/null | awk "/^Package: /{p=\$2} /^Version: /{v=\$2} /^Architecture/{a=\$2} /^$/{ if (a==\"all\") { $print_short } else { $print_long } }" || {
                 error "apt-cache is unable to locate package '$package'"
                 false  # ensure exit status accurately reflects result of command
             }
