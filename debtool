@@ -877,7 +877,7 @@ prep_build(){
 # query user for package selection
 querypackage(){
 
-    declare -Al indexed_packages
+    declare -A indexed_packages
     local choice destination ordered_packages
 
     while IFS= read -r string; do
