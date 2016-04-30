@@ -545,7 +545,7 @@ combo(){
             if (( $? != 0 )); then
                 error "apt-get experienced an error downloading '$package'"
                 check_internet || {
-                    warning "No Internet connectivity"
+                    warning 'No Internet connectivity'
                     return 100
                 }
                 return 1
@@ -584,8 +584,8 @@ create_backup(){
     # create a temporary directory
     BACKUPDIR=$(mktemp --directory 2>/dev/null)
     if [[ ! -d $BACKUPDIR ]]; then
-        error "Experienced unknown error while creating temporary directory"
-        echo "Please remove the pre-existing file and try again" >&2
+        error 'Experienced unknown error while creating temporary directory'
+        echo 'Please remove the pre-existing file and try again' >&2
         exit 1
     fi
 
@@ -626,7 +626,7 @@ download(){
 
         if (( ${#failures[@]} > 0 )); then
             error "Failed to download: ${failures[*]}"
-            check_internet || warning "No Internet connectivity"
+            check_internet || warning 'No Internet connectivity'
             return 1
         fi
     )
@@ -892,11 +892,11 @@ querypackage(){
 
     echo
     echo "$1"
-    echo "----------"
+    echo '----------'
 
     select choice in "${ordered_packages[@]}" SKIP; do
         if [[ -z $choice ]]; then
-            error "Invalid selection"
+            error 'Invalid selection'
             continue
         elif [[ $choice = SKIP ]]; then
             return 0
@@ -917,11 +917,11 @@ querypackage(){
 
 #     echo
 #     echo "$1"
-#     echo "----------"
+#     echo '----------'
 
 #     select choice in "${packages[@]}" SKIP; do
 #         if [[ -z $choice ]]; then
-#             error "Invalid selection"
+#             error 'Invalid selection'
 #             continue
 #         elif [[ $choice = SKIP ]]; then
 #             return 0
@@ -1272,7 +1272,7 @@ elif commands build reinst; then
     enable_reinstall
     cmd='build'
 else
-    error "Too many commands"
+    error 'Too many commands'
     exit 1
 fi
 
