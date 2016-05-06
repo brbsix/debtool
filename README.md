@@ -13,9 +13,12 @@ To install `debtool` via Debian archive:
 
     curl -LOsS https://github.com/brbsix/debtool/releases/download/v0.2.5/debtool_0.2.5_all.deb
     sudo dpkg --install debtool_0.2.5_all.deb
+    sudo apt-get install --fix-broken  # install fakeroot dependency
 
 To install `debtool` from git repository:
 
+    git clone https://github.com/brbsix/debtool
+    cd debtool/
     sudo install debtool /usr/local/bin
     sudo install -m 0644 debtool-completion /etc/bash_completion.d/debtool
 
