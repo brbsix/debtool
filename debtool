@@ -425,7 +425,7 @@ check_build_destination(){
         if (( AUTO != 1 )); then
 
             # prompt to overwrite pre-existing file
-            read -p "Overwrite pre-existing file '$2' (y|N)? "
+            read -p "Overwrite pre-existing file '$2' (y|N)? " -r
             if [[ ${REPLY,} != y* ]]; then
                 exit 1
             fi
@@ -1099,7 +1099,7 @@ unpack(){
 
         # prompt to delete archive
         if [[ $pkgtype = archive ]] && (( AUTO != 1 )); then
-            read -p "Remove '$1'? "
+            read -p "Remove '$1'? " -r
             if [[ ${REPLY,} = y* ]]; then
                 rm "$1"
             fi

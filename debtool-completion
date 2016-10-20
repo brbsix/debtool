@@ -29,7 +29,7 @@ __debtool(){
     shopts='a,b,c,d,f,h,i,m,q,r,s,u,z'
     lopts='auto,build,combo,download,fast,format,help,interactive,md5sums,quiet,reinst,repack,show,unpack'
     params=$(getopt -o "$shopts" -l "$lopts" -- "${COMP_WORDS[@]::${#COMP_WORDS[@]}-1}" 2>/dev/null)
-    eval options=("$params")
+    eval "options=($params)"
 
     cmd=$(__debtool_getcmd)
 

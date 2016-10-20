@@ -42,7 +42,7 @@ CURRENT_VERSION=$(awk -F= '/^VERSION=/ {gsub("[\042\047]", ""); print $2}' "$APP
 info "Package's current version number is '$CURRENT_VERSION'"
 
 # prompt user for new version
-read -ei "$CURRENT_VERSION" -p 'Please enter new version number: ' NEW_VERSION
+read -ei "$CURRENT_VERSION" -p 'Please enter new version number: ' -r NEW_VERSION
 
 # ensure user has entered new version
 [[ -n $NEW_VERSION ]] || {
