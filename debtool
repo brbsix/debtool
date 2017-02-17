@@ -787,7 +787,7 @@ md5sums_helper(){
 pkgtype(){
     (
         # for a Debian archive file
-        dpkg-deb --info "$1" &>/dev/null && pkgtype+=('archive')
+        dpkg-deb --info -- "$1" &>/dev/null && pkgtype+=('archive')
 
         # for an installed package
         [[ $(dpkg-query --show --showformat="\${Status}" "$1" 2>/dev/null) = 'install ok installed' ]] && pkgtype+=('installation')
