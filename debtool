@@ -1144,7 +1144,7 @@ version(){
     cat <<-EOF
 	$PROGRAM $VERSION
 
-	Copyright (c) 2017 Six (brbsix@gmail.com)
+	Copyright (c) 2018 Six (brbsix@gmail.com)
 	EOF
     exit 0
 }

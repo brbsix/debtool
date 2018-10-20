@@ -174,7 +174,7 @@ To create a new release, ensure you have **devscripts** installed then run the f
 
 ## License
 
-Copyright (c) 2015 Six <brbsix@gmail.com>
+Copyright (c) 2015-2018 Six <brbsix@gmail.com>
 
 Licensed under the GPLv3 license.
 
