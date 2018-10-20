@@ -6,6 +6,7 @@ addons:
     packages:
     - bc
     - devscripts
+    - fakeroot
 
 script:
   - make deb
