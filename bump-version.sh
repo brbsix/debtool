@@ -54,7 +54,7 @@ sed -i "s/${CURRENT_VERSION//./\\.}/$NEW_VERSION/g" README.md || {
 
 # update version string in application
 sedstring=$(cat <<EOF
-s/^\(VERSION=['"]\).*\(['"]\)$/\1$NEW_VERSION\2/
+s/^\\(VERSION=['"]\\).*\\(['"]\\)$/\\1$NEW_VERSION\\2/
 EOF
 )
 
