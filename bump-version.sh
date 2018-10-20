@@ -19,13 +19,6 @@ PROGRAM=${0##*/}
 APPLICATION=debtool
 SCRIPT_DIRECTORY=$(readlink -m "$(dirname "$0")")
 
-# FILES=(caffeine-screensaver
-#        share/man/man1/caffeine.1
-#        share/man/man1/caffeine-indicator.1
-#        share/man/man1/caffeine-screensaver.1
-#        README.rst
-#        VERSION)
-
 # ensure debchange is installed
 hash dch &>/dev/null || {
     error "debchange is not installed... please install devscripts"
