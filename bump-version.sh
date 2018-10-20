@@ -32,7 +32,7 @@ cd "$SCRIPT_DIRECTORY" || {
 # determine the package's current version
 CURRENT_VERSION=$(awk -F= '/^VERSION=/ {gsub("[\042\047]", ""); print $2}' "$APPLICATION")
 
-info "Package's current version number is '$CURRENT_VERSION'"
+info "Package's current version number: $CURRENT_VERSION"
 
 # prompt user for new version
 read -ei "$CURRENT_VERSION" -p 'Please enter new version number: ' -r NEW_VERSION
