@@ -3,11 +3,11 @@ Upstream-Name: debtool
 Source: https://github.com/brbsix/debtool
 
 Files: *
-Copyright: 2018 Six <brbsix@gmail.com>
+Copyright: 2020 Six <brbsix@gmail.com>
 License: GPL-3.0+
 
 Files: debian/*
-Copyright: 2018 Six <brbsix@gmail.com>
+Copyright: 2020 Six <brbsix@gmail.com>
 License: GPL-3.0+
 
 License: GPL-3.0+
