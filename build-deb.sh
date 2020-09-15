@@ -22,17 +22,16 @@ TEMP_DIRECTORY=$SCRIPT_DIRECTORY/temp_dir
 BUILD_DIRECTORY=$TEMP_DIRECTORY/build_dir
 BUILD_PATHS=(debian "$APPLICATION" "${APPLICATION}-completion" README.md)
 VERSION=$(awk -F= '/^VERSION=/ {gsub("[\042\047]", ""); print $2}' "$APPLICATION")
+KEEP_FILES=0
 
-DEVELOPMENT=0
-
-if (( $# == 1 )) && [[ $1 =~ ^(-d|--dev(elopment)?)$ ]]; then
-    DEVELOPMENT=1
+if (( $# == 1 )) && [[ $1 =~ ^(-k|--keep(-files)?)$ ]]; then
+    KEEP_FILES=1
 elif (( $# != 0 )); then
     cat <<-EOF
-	Usage: $PROGRAM [-d|--development]
+	Usage: $PROGRAM [-k|--keep-files]
 	Build a Debian package.
 
-	  -d, --development      DO NOT remove build files after build
+	  -k, --keep-files       DO NOT remove build files after build
 
 	Build details:
 
@@ -96,8 +95,8 @@ mv ./*.deb "$SCRIPT_DIRECTORY" || {
     fatal "Failed to move .deb into '$SCRIPT_DIRECTORY'"
 }
 
-# exit before removing build files if dev mode is enabled
-(( DEVELOPMENT == 1 )) && exit 0
+# optionally exit before removing build files
+(( KEEP_FILES == 1 )) && exit 0
 
 # return to the script directory
 cd "$SCRIPT_DIRECTORY" || {
