@@ -161,7 +161,7 @@ _test_debtool_version_option_output(){
     local option
 
     for option in -v --version; do
-        if "$DEBTOOL" "$option" 2>/dev/null | grep -Pqz "^debtool $(sed 's/\./\\./g' <<<"$VERSION")\n\nCopyright \(c\) $(date +%Y) Six \(brbsix@gmail\.com\)\n\$"; then
+        if "$DEBTOOL" "$option" 2>/dev/null | grep -Pqz "debtool $(sed 's/\./\\./g' <<<"$VERSION")\n\nCopyright \(c\) $(date +%Y) Six \(brbsix@gmail\.com\)\n\$"; then
             pass_test
         else
             fail_test "'$option' option failed to match expected output"
