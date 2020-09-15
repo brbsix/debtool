@@ -691,7 +691,7 @@ fast(){
 # aquire the package destination filename
 findpackage(){
     while IFS= read -r string; do
-        DESTINATION=$(apt-cache show "$string" | awk -F/ '/^Filename:/ {print $NF}')
+        DESTINATION=$(apt --print-uris download "$string" 2>/dev/null | awk '{print $2}')
         if [[ -n $DESTINATION ]]; then
             FULLPACKAGE=$string
             break
