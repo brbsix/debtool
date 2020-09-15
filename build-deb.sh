@@ -3,8 +3,8 @@
 # Build debtool Debian package
 
 
-error(){
-    echo "$PROGRAM:ERROR: $*" >&2
+fatal(){
+    echo "$PROGRAM:FATAL: $*" >&2
     exit 1
 }
 
@@ -50,22 +50,22 @@ fi
 
 # enter the script directory
 cd "$SCRIPT_DIRECTORY" || {
-    error "Failed to cd into $SCRIPT_DIRECTORY"
+    fatal "Failed to cd into '$SCRIPT_DIRECTORY'"
 }
 
 # ensure temp directory does not already exist
 if [[ -d $TEMP_DIRECTORY ]]; then
-    error "Temporary directory '$TEMP_DIRECTORY' already exists... Remove it before continuing."
+    fatal "Temporary directory '$TEMP_DIRECTORY' already exists. Remove it before continuing."
 fi
 
 # create temp directory and build directory
 mkdir -p "$BUILD_DIRECTORY" || {
-    error "Failed to create $BUILD_DIRECTORY"
+    fatal "Failed to create '$BUILD_DIRECTORY'"
 }
 
 # copy paths into build directory
 cp -at "$BUILD_DIRECTORY" "${BUILD_PATHS[@]}" || {
-    error "Failed to copy paths into build directory"
+    fatal 'Failed to copy paths into build directory'
 }
 
 # rename README.md to README
@@ -73,7 +73,7 @@ mv "$BUILD_DIRECTORY/README.md" "$BUILD_DIRECTORY/README"
 
 # enter the build directory
 cd "$BUILD_DIRECTORY" || {
-    error "Failed to cd into $BUILD_DIRECTORY"
+    fatal "Failed to cd into '$BUILD_DIRECTORY'"
 }
 
 # perform build
@@ -88,12 +88,12 @@ fi
 
 # enter the temp directory containing .deb and logs
 cd "$TEMP_DIRECTORY" || {
-    error "Failed to cd into $TEMP_DIRECTORY"
+    fatal "Failed to cd into '$TEMP_DIRECTORY'"
 }
 
 # move .deb into the root directory
 mv ./*.deb "$SCRIPT_DIRECTORY" || {
-    error "Failed to move .deb into $SCRIPT_DIRECTORY"
+    fatal "Failed to move .deb into '$SCRIPT_DIRECTORY'"
 }
 
 # exit before removing build files if dev mode is enabled
@@ -101,7 +101,7 @@ mv ./*.deb "$SCRIPT_DIRECTORY" || {
 
 # return to the script directory
 cd "$SCRIPT_DIRECTORY" || {
-    error "Failed to cd back into $SCRIPT_DIRECTORY"
+    fatal "Failed to cd back into '$SCRIPT_DIRECTORY'"
 }
 
 # remove the temp directory
