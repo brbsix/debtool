@@ -75,15 +75,10 @@ cd "$BUILD_DIRECTORY" || {
     fatal "Failed to cd into '$BUILD_DIRECTORY'"
 }
 
-# perform build
-debuild -b -uc -us
-
-EC=$?
-
-# warn upon debuild failure
-if (( EC != 0 )); then
+# perform build and warn upon failure
+debuild -b -uc -us || {
     warning "debuild returned a nonzero exit code [$EC]"
-fi
+}
 
 # enter the temp directory containing .deb and logs
 cd "$TEMP_DIRECTORY" || {

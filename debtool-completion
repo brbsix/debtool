@@ -10,7 +10,7 @@
 _have debtool && {
 
 __debtool(){
-    local cmd cur lopts options params shopts
+    local cmd cur lopts opts params shopts
 
     COMPREPLY=()
     cur=${COMP_WORDS[COMP_CWORD]}
@@ -29,7 +29,7 @@ __debtool(){
     shopts='a,b,c,d,f,h,i,m,q,r,s,u,z'
     lopts='auto,build,combo,download,fast,format,help,interactive,md5sums,quiet,reinst,repack,show,unpack'
     params=$(getopt -o "$shopts" -l "$lopts" -- "${COMP_WORDS[@]::${#COMP_WORDS[@]}-1}" 2>/dev/null)
-    eval "options=($params)"
+    eval "opts=($params)"
 
     cmd=$(__debtool_getcmd)
 
@@ -95,11 +95,11 @@ __debtool(){
 }
 
 __debtool_contains(){
-    local arg option
+    local arg opt
 
     for arg in "$@"; do
-        for option in "${options[@]}"; do
-            if [[ $arg = "$option" ]]; then
+        for opt in "${opts[@]}"; do
+            if [[ $arg = "$opt" ]]; then
                 return 0
             fi
         done
