@@ -14,8 +14,9 @@ warning(){
 }
 
 
-PROGRAM=${0##*/}
+set -eo pipefail
 
+PROGRAM=${0##*/}
 APPLICATION=debtool
 SCRIPT_DIRECTORY=$(readlink -m "$(dirname "$0")")
 TEMP_DIRECTORY=$SCRIPT_DIRECTORY/temp_dir
